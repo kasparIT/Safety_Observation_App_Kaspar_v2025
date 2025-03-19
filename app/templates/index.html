@@ -16,8 +16,8 @@
             <label>Company:</label>
             <select name="company" id="company-select" class="form-select">
                 <option value="">Select a Company</option>
-                {% for company in companies %}
-                    <option value="{{ company }}">{{ company }}</option>
+                {% for abbr, full_name in companies %}
+                    <option value="{{ abbr }}">{{ full_name }}</option>
                 {% endfor %}
             </select>
 

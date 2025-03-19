@@ -1,3 +1,5 @@
+###venv\Scripts\Activate  ---- to activate env
+
 from app import create_app
 
 app = create_app()

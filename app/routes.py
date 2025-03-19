@@ -3,9 +3,21 @@ from app.database import get_db_connection
 
 main = Blueprint("main", __name__)
 
+# Company Name Mapping (Modify based on actual database structure)
+COMPANY_NAME_MAPPING = {
+    "HFA": "HFA - Horizon Firearms",
+    "KCI": "KCI - Kaspar Companies Inc.",
+    "KPI": "KPI - Kaspar Property",
+    "TA": "TA - Texas Ammunition",
+    "TBE": "TBE - Bedrock Truck Beds",
+    "TPM": "TPM - Texas Precious Metals",
+    "TRK": "TRK - Kaspar Trucking",
+    "WHL": "WHL - Circle Y Saddles & Precision Saddle Tree"
+}
+
 @main.route("/")
 def home():
-    """Fetch unique company names for dropdown."""
+    """Fetch unique company abbreviations and map them to full names."""
     conn = get_db_connection()
     companies = []
 
@@ -13,10 +25,13 @@ def home():
         cursor = conn.cursor()
         try:
             cursor.execute("SELECT DISTINCT Company_Name FROM dbo.Paylocity_Employee_Data WHERE Company_Name IS NOT NULL")
-            companies = [row[0] for row in cursor.fetchall()]
+            fetched_companies = [row[0] for row in cursor.fetchall()]
+            # Replace abbreviations with full names if available
+            companies = [(abbr, COMPANY_NAME_MAPPING.get(abbr, abbr)) for abbr in fetched_companies]
         except Exception as e:
             print(f"❌ Error fetching companies: {e}")
         finally:
+            cursor.close()
             conn.close()
 
     return render_template("index.html", companies=companies)
@@ -49,6 +64,7 @@ def get_employees():
         except Exception as e:
             print(f"❌ Error fetching employees: {e}")
         finally:
+            cursor.close()
             conn.close()
 
     return jsonify(employees)  # Return employees as JSON
