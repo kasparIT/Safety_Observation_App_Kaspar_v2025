@@ -6,45 +6,87 @@
     <title>Safety Observation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Safety Observation Form</h1>
+        <!-- Logo Left, Title Centered -->
+        <div class="form-header">
+            <img src="{{ url_for('static', filename='images/kbs_logo.png') }}" alt="Company Logo" class="logo">
+            <div class="title-container">
+                <h1>Safety Observation Form</h1>
+            </div>
+        </div>
+
         <form method="POST">
-            <!-- Company Dropdown -->
-            <label>Company:</label>
-            <select name="company" id="company-select" class="form-select">
-                <option value="">Select a Company</option>
-                {% for abbr, full_name in companies %}
-                    <option value="{{ abbr }}">{{ full_name }}</option>
-                {% endfor %}
-            </select>
-
-            <!-- Employee Dropdown (Initially Empty) -->
-            <label>Employee Name:</label>
-            <select name="employee" id="employee-select" class="form-select">
-                <option value="">Select a Company First</option>
-            </select>
-
-            <label>Observation:</label>
-            <textarea name="observation" class="form-control"></textarea>
-
-            <label>Supervisor Action:</label>
-            <textarea name="action" class="form-control"></textarea>
-
-            <label>Overall Act:</label>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act">
-                <label class="form-check-label" for="safe-act">Safe Act</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act">
-                <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
+            <!-- Row 1: Company & Employee Name -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Company:</label>
+                    <select name="company" id="company-select" class="form-control">
+                        <option value="">Select a Company</option>
+                        {% for abbr, full_name in companies %}
+                            <option value="{{ abbr }}">{{ full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Employee Name:</label>
+                    <select name="employee" id="employee-select" class="form-control" disabled>
+                        <option value="">Select a Company First</option>
+                    </select>
+                </div>
             </div>
 
-            <label>Date:</label>
-            <input type="date" name="date" class="form-control">
+            <!-- Observation Text Area -->
+            <div class="form-group">
+                <label>Observation:</label>
+                <textarea name="observation" id="observation-text" class="form-control" disabled></textarea>
+            </div>
+
+            <!-- Row 2: Location & Area Observed -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Location:</label>
+                    <select name="location" id="location-select" class="form-control" disabled>
+                        <option value="">Select a Location</option>
+                        <option value="KPI">KPI</option>
+                        <option value="HFA">HFA</option>
+                        <option value="IT Security">IT Security</option>
+                        <option value="TBE">TBE</option>
+                        <option value="TPM">TPM</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Area Observed:</label>
+                    <select name="area_observed" id="area-observed-select" class="form-control" disabled>
+                        <option value="">Select a Location First</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Overall Act -->
+            <div class="form-group">
+                <label>Overall Act:</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
+                    <label class="form-check-label" for="safe-act">Safe Act</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
+                    <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
+                </div>
+            </div>
+
+            <!-- Date Picker (Hidden Until Clicked) -->
+            <div class="form-group">
+                <label>Date Observed:</label>
+                <input type="text" id="date-picker" name="date" class="form-control">
+            </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
@@ -52,9 +94,23 @@
 
     <script>
         $(document).ready(function() {
+            // Enable select2 for better dropdown UX
+            $("#company-select, #employee-select").select2();
+
+            // Hardcoded mapping of Locations to Areas
+            const areaObservedOptions = {
+                "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
+                "HFA": ["Production Floor", "Quality Control", "Warehouse"],
+                "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
+                "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
+                "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
+            };
+
+            // Enable Employee Selection only after Company Selection
             $("#company-select").change(function() {
                 let selectedCompany = $(this).val();
-                
+                let employeeDropdown = $("#employee-select");
+
                 if (selectedCompany) {
                     $.ajax({
                         url: "/get-employees",
@@ -62,18 +118,50 @@
                         contentType: "application/json",
                         data: JSON.stringify({ company: selectedCompany }),
                         success: function(response) {
-                            let employeeDropdown = $("#employee-select");
-                            employeeDropdown.empty();
-                            employeeDropdown.append('<option value="">Select an Employee</option>');
-
-                            response.forEach(function(emp) {
+                            employeeDropdown.empty().append('<option value="">Select an Employee</option>');
+                            response.forEach(emp => {
                                 employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
                             });
+                            employeeDropdown.prop("disabled", false);
                         }
                     });
                 } else {
-                    $("#employee-select").html('<option value="">Select a Company First</option>');
+                    employeeDropdown.empty().append('<option value="">Select a Company First</option>').prop("disabled", true);
                 }
+            });
+
+            // Enable Observation Field when Employee is Selected
+            $("#employee-select").change(function() {
+                $("#observation-text").prop("disabled", $(this).val() === "");
+            });
+
+            // Enable Location Field when Observation is Filled & Enable Overall Act
+            $("#observation-text").on("input", function() {
+                let filled = $(this).val().trim() !== "";
+                $("#location-select").prop("disabled", !filled);
+                $("#safe-act, #unsafe-act").prop("disabled", !filled);
+            });
+
+            // Update Area Observed based on selected Location
+            $("#location-select").change(function() {
+                let selectedLocation = $(this).val();
+                let areaDropdown = $("#area-observed-select");
+                areaDropdown.empty();
+
+                if (selectedLocation && areaObservedOptions[selectedLocation]) {
+                    areaDropdown.append('<option value="">Select an Area</option>');
+                    areaObservedOptions[selectedLocation].forEach(area => {
+                        areaDropdown.append(`<option value="${area}">${area}</option>`);
+                    });
+                    areaDropdown.prop("disabled", false);
+                } else {
+                    areaDropdown.append('<option value="">Select a Location First</option>').prop("disabled", true);
+                }
+            });
+
+            // Initialize Calendar (Show on Click)
+            flatpickr("#date-picker", {
+                dateFormat: "Y-m-d"
             });
         });
     </script>

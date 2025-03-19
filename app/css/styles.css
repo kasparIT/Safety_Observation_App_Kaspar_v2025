@@ -1,58 +1,132 @@
-/* General Styles */
+/* General Page Styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
+    background-color: #f8f9fa;
     margin: 0;
     padding: 0;
 }
 
 /* Container Styling */
 .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: 50px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styling - Align Logo Left, Title Center */
+.form-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Logo Styling */
+.logo {
+    height: 50px;
+    width: auto;
+    position: absolute;
+    left: 20px; /* Ensures it stays on the left */
+}
+
+/* Center the Title & Change Color */
+h1 {
+    flex-grow: 1; 
+    color: rgb(164, 196, 244);
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
 }
 
 /* Form Styling */
-form {
-    display: flex;
-    flex-direction: column;
+.form-group {
+    margin-bottom: 15px;
 }
 
+/* Label Styling */
 label {
     font-weight: bold;
+    display: block;
     margin-top: 10px;
 }
 
-/* Select and Input Styling */
+/* Input, Select, and Textarea Styling */
 select, textarea, input {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
 }
 
-/* Button Styling */
-button {
+/* Row Layout for Side-by-Side Fields */
+.row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Ensure Side-by-Side Fields Adjust on Small Screens */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+}
+
+/* Form Button Styling */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    font-size: 16px;
     background-color: #007bff;
-    color: white;
-    padding: 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 15px;
+    transition: 0.3s ease-in-out;
 }
 
-button:hover {
+.btn-primary:hover {
     background-color: #0056b3;
 }
 
-/* Center Align Form */
-h1 {
-    text-align: center;
-    color: #333;
+/* Disabled Fields Styling */
+select:disabled, textarea:disabled, input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* Radio Buttons Styling */
+.form-check {
+    margin-top: 10px;
+}
+
+.form-check-input {
+    margin-right: 5px;
+}
+
+/* Flatpickr Calendar */
+.flatpickr-calendar {
+    margin-top: 10px;
+}
+
+/* Adjust Dropdowns to Improve Readability */
+select {
+    appearance: none;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+/* Improve Focus Effect on Form Fields */
+input:focus, select:focus, textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
 }
