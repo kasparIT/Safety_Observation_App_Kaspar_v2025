@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Observation</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery for AJAX -->
+</head>
+<body>
+    <h1>Safety Observation Form</h1>
+    <form method="POST">
+        <!-- Company Dropdown -->
+        <label>Company:</label>
+        <select name="company" id="company-select">
+            <option value="">Select a Company</option>
+            {% for company in companies %}
+                <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <!-- Employee Dropdown (Initially Empty) -->
+        <label>Employee Name:</label>
+        <select name="employee" id="employee-select">
+            <option value="">Select a Company First</option>
+        </select>
+        <br><br>
+
+        <label>Observation:</label>
+        <textarea name="observation"></textarea><br><br>
+
+        <label>Supervisor Action:</label>
+        <textarea name="action"></textarea><br><br>
+
+        <label>Overall Act:</label>
+        <input type="radio" name="overall_act" value="Safe Act"> Safe Act
+        <input type="radio" name="overall_act" value="Unsafe Act"> Unsafe Act
+        <br><br>
+
+        <label>Date:</label>
+        <input type="date" name="date"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            $("#company-select").change(function() {
+                let selectedCompany = $(this).val();
+                
+                if (selectedCompany) {
+                    $.ajax({
+                        url: "/get-employees",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ company: selectedCompany }),
+                        success: function(response) {
+                            let employeeDropdown = $("#employee-select");
+                            employeeDropdown.empty(); // Clear existing options
+                            employeeDropdown.append('<option value="">Select an Employee</option>');
+
+                            response.forEach(function(emp) {
+                                employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
+                            });
+                        }
+                    });
+                } else {
+                    $("#employee-select").html('<option value="">Select a Company First</option>');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
