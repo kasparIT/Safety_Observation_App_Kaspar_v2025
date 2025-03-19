@@ -4,44 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safety Observation</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery for AJAX -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
 </head>
 <body>
-    <h1>Safety Observation Form</h1>
-    <form method="POST">
-        <!-- Company Dropdown -->
-        <label>Company:</label>
-        <select name="company" id="company-select">
-            <option value="">Select a Company</option>
-            {% for company in companies %}
-                <option value="{{ company }}">{{ company }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
+    <div class="container">
+        <h1>Safety Observation Form</h1>
+        <form method="POST">
+            <!-- Company Dropdown -->
+            <label>Company:</label>
+            <select name="company" id="company-select" class="form-select">
+                <option value="">Select a Company</option>
+                {% for company in companies %}
+                    <option value="{{ company }}">{{ company }}</option>
+                {% endfor %}
+            </select>
 
-        <!-- Employee Dropdown (Initially Empty) -->
-        <label>Employee Name:</label>
-        <select name="employee" id="employee-select">
-            <option value="">Select a Company First</option>
-        </select>
-        <br><br>
+            <!-- Employee Dropdown (Initially Empty) -->
+            <label>Employee Name:</label>
+            <select name="employee" id="employee-select" class="form-select">
+                <option value="">Select a Company First</option>
+            </select>
 
-        <label>Observation:</label>
-        <textarea name="observation"></textarea><br><br>
+            <label>Observation:</label>
+            <textarea name="observation" class="form-control"></textarea>
 
-        <label>Supervisor Action:</label>
-        <textarea name="action"></textarea><br><br>
+            <label>Supervisor Action:</label>
+            <textarea name="action" class="form-control"></textarea>
 
-        <label>Overall Act:</label>
-        <input type="radio" name="overall_act" value="Safe Act"> Safe Act
-        <input type="radio" name="overall_act" value="Unsafe Act"> Unsafe Act
-        <br><br>
+            <label>Overall Act:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act">
+                <label class="form-check-label" for="safe-act">Safe Act</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act">
+                <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
+            </div>
 
-        <label>Date:</label>
-        <input type="date" name="date"><br><br>
+            <label>Date:</label>
+            <input type="date" name="date" class="form-control">
 
-        <button type="submit">Submit</button>
-    </form>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
 
     <script>
         $(document).ready(function() {
@@ -56,7 +63,7 @@
                         data: JSON.stringify({ company: selectedCompany }),
                         success: function(response) {
                             let employeeDropdown = $("#employee-select");
-                            employeeDropdown.empty(); // Clear existing options
+                            employeeDropdown.empty();
                             employeeDropdown.append('<option value="">Select an Employee</option>');
 
                             response.forEach(function(emp) {

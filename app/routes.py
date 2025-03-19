@@ -38,7 +38,7 @@ def get_employees():
             cursor.execute("""
                 SELECT Employee_Id, First_Name, Middle_Name, Last_Name 
                 FROM dbo.Paylocity_Employee_Data 
-                WHERE Company_Name = ? AND First_Name IS NOT NULL AND Last_Name IS NOT NULL
+                WHERE Company_Name = ? AND Is_Active = 'Yes' AND First_Name IS NOT NULL AND Last_Name IS NOT NULL
                 ORDER BY First_Name ASC
             """, (selected_company,))
             
