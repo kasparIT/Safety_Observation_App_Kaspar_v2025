@@ -1,18 +1,21 @@
+
 /* Base Styling */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fc;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    max-width: 900px;
-    margin: 30px auto;
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 950px;
+    margin: 40px auto;
+    background: linear-gradient(to bottom right, #ffffff, #f4f7fc);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Header Styling */
@@ -36,9 +39,9 @@ body {
 }
 
 h1 {
-    color: rgb(164, 196, 244);
-    font-size: 24px;
-    font-weight: bold;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -59,29 +62,36 @@ h1 {
 }
 
 label {
-    font-weight: 600;
+    font-weight: 500;
     display: block;
     margin-bottom: 6px;
-    color: #333;
+    color: #2c3e50;
     font-size: 14px;
 }
 
 select, textarea, input[type="text"] {
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 14px;
     background-color: #fff;
     box-sizing: border-box;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+select:focus, textarea:focus, input[type="text"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+    outline: none;
 }
 
 textarea {
-    min-height: 80px;
+    min-height: 100px;
     resize: vertical;
 }
 
-/* Radio Button Styling - Fixed */
+/* Radio Button Styling */
 .radio-group {
     display: flex;
     gap: 20px;
@@ -111,33 +121,44 @@ textarea {
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: #0056d2;
     color: white;
     border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
+    padding: 10px 24px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0, 86, 210, 0.2);
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .btn-primary:hover {
-    background-color: #0069d9;
+    background-color: #0046b3;
+    transform: translateY(-1px);
 }
 
 /* Select2 Styling */
 .select2-container .select2-selection--single {
-    height: 36px;
-    padding: 4px 8px;
+    height: 42px;
+    padding: 6px 12px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 36px;
+    height: 42px;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 28px;
+    line-height: 30px;
     color: #444;
+}
+
+/* Consistent input vertical alignment fix */
+select, textarea, input[type="text"] {
+    vertical-align: middle;
+    line-height: 1.5;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }

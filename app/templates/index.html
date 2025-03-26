@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safety Observation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
@@ -28,7 +30,7 @@
                 <div class="col-md-6">
                     <label for="company-select">Company:</label>
                     <select name="company" id="company-select" class="form-control">
-                        <option value="">Select a Company</option>
+                        <option value="" disabled selected></option>
                         {% for abbr, full_name in companies %}
                             <option value="{{ abbr }}">{{ full_name }}</option>
                         {% endfor %}
@@ -37,15 +39,26 @@
                 <div class="col-md-6">
                     <label for="employee-select">Employee Name:</label>
                     <select name="employee" id="employee-select" class="form-control" disabled>
-                        <option value="">Select a Company First</option>
+                        <option value="" disabled selected></option>
                     </select>
                 </div>
             </div>
 
-            <!-- Observation Text Area -->
-            <div class="form-group">
-                <label for="observation-text">Observation:</label>
-                <textarea name="observation" id="observation-text" class="form-control" disabled></textarea>
+            <!-- Overall Act Selection -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Overall Act:</label>
+                    <div class="radio-group justify-content-start" style="gap: 40px; margin-top: 6px;">
+                        <label class="form-check-label d-flex align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
+                            Safe Act
+                        </label>
+                        <label class="form-check-label d-flex align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
+                            Unsafe Act
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Location and Area Observed -->
@@ -53,7 +66,7 @@
                 <div class="col-md-6">
                     <label for="location-select">Location:</label>
                     <select name="location" id="location-select" class="form-control" disabled>
-                        <option value="">Select a Location</option>
+                        <option value="" disabled selected></option>
                         <option value="KPI">KPI</option>
                         <option value="HFA">HFA</option>
                         <option value="IT Security">IT Security</option>
@@ -64,26 +77,19 @@
                 <div class="col-md-6">
                     <label for="area-observed-select">Area Observed:</label>
                     <select name="area_observed" id="area-observed-select" class="form-control" disabled>
-                        <option value="">Select a Location First</option>
+                        <option value="" disabled selected></option>
                     </select>
                 </div>
             </div>
 
-            <!-- Overall Act and Date in Same Row -->
+            <!-- Observation Text Area -->
+            <div class="form-group">
+                <label for="observation-text">Observation:</label>
+                <textarea name="observation" id="observation-text" class="form-control" disabled></textarea>
+            </div>
+
+            <!-- Date Picker -->
             <div class="row">
-                <div class="col-md-6">
-                    <label>Overall Act:</label>
-                    <div class="radio-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
-                            <label class="form-check-label" for="safe-act">Safe Act</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
-                            <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
-                        </div>
-                    </div>
-                </div>
                 <div class="col-md-6">
                     <label for="date-picker">Date Observed:</label>
                     <input type="text" id="date-picker" name="date" class="form-control">
@@ -99,13 +105,11 @@
 
     <script>
         $(document).ready(function() {
-            // Enable select2 for better dropdown UX
             $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
                 minimumResultsForSearch: 6,
                 width: '100%'
             });
 
-            // Hardcoded mapping of Locations to Areas
             const areaObservedOptions = {
                 "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
                 "HFA": ["Production Floor", "Quality Control", "Warehouse"],
@@ -114,7 +118,6 @@
                 "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
             };
 
-            // Enable Employee Selection only after Company Selection
             $("#company-select").change(function() {
                 let selectedCompany = $(this).val();
                 let employeeDropdown = $("#employee-select");
@@ -126,7 +129,7 @@
                         contentType: "application/json",
                         data: JSON.stringify({ company: selectedCompany }),
                         success: function(response) {
-                            employeeDropdown.empty().append('<option value="">Select an Employee</option>');
+                            employeeDropdown.empty().append('<option value="" disabled selected></option>');
                             response.forEach(emp => {
                                 employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
                             });
@@ -135,44 +138,107 @@
                         }
                     });
                 } else {
-                    employeeDropdown.empty().append('<option value="">Select a Company First</option>').prop("disabled", true);
+                    employeeDropdown.empty().append('<option value="" disabled selected></option>').prop("disabled", true);
                     employeeDropdown.trigger('change.select2');
                 }
             });
 
-            // Enable Observation Field when Employee is Selected
+            function checkEmployeeSelected() {
+                let employeeSelected = $("#employee-select").val() !== "";
+                $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
+            }
+
             $("#employee-select").change(function() {
-                $("#observation-text").prop("disabled", $(this).val() === "");
+                let selected = $(this).val();
+                $("#observation-text").prop("disabled", selected === "");
+                checkEmployeeSelected();
             });
 
-            // Enable Location Field when Observation is Filled & Enable Overall Act
             $("#observation-text").on("input", function() {
                 let filled = $(this).val().trim() !== "";
                 $("#location-select").prop("disabled", !filled);
-                $("#safe-act, #unsafe-act").prop("disabled", !filled);
             });
 
-            // Update Area Observed based on selected Location
             $("#location-select").change(function() {
                 let selectedLocation = $(this).val();
                 let areaDropdown = $("#area-observed-select");
                 areaDropdown.empty();
 
                 if (selectedLocation && areaObservedOptions[selectedLocation]) {
-                    areaDropdown.append('<option value="">Select an Area</option>');
+                    areaDropdown.append('<option value="" disabled selected></option>');
                     areaObservedOptions[selectedLocation].forEach(area => {
                         areaDropdown.append(`<option value="${area}">${area}</option>`);
                     });
                     areaDropdown.prop("disabled", false);
                 } else {
-                    areaDropdown.append('<option value="">Select a Location First</option>').prop("disabled", true);
+                    areaDropdown.append('<option value="" disabled selected></option>').prop("disabled", true);
                 }
                 areaDropdown.trigger('change.select2');
             });
 
-            // Initialize Calendar (Show on Click)
-            flatpickr("#date-picker", {
-                dateFormat: "Y-m-d"
+            function checkFlowState() {
+                const companySelected = $("#company-select").val() !== "";
+                const employeeSelected = $("#employee-select").val() !== "";
+                const actSelected = $("input[name='overall_act']:checked").val() !== undefined;
+                const locationSelected = $("#location-select").val() !== "";
+                const areaSelected = $("#area-observed-select").val() !== "";
+
+                $("#employee-select").prop("disabled", !companySelected);
+                $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
+                $("#location-select").prop("disabled", !actSelected);
+                $("#area-observed-select").prop("disabled", !locationSelected);
+                $("#observation-text").prop("disabled", !areaSelected);
+            }
+
+            $("#company-select").change(function () {
+                $("#employee-select").val("").trigger("change.select2");
+                checkFlowState();
+            });
+
+            $("#employee-select").change(function () {
+                $("input[name='overall_act']").prop("checked", false);
+                checkFlowState();
+            });
+
+            $("input[name='overall_act']").change(function () {
+                $("#location-select").val("").trigger("change.select2");
+                checkFlowState();
+            });
+
+            $("#location-select").change(function () {
+                $("#area-observed-select").val("").trigger("change.select2");
+                checkFlowState();
+
+                const areaObservedOptions = {
+                    "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
+                    "HFA": ["Production Floor", "Quality Control", "Warehouse"],
+                    "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
+                    "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
+                    "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
+                };
+
+                const selectedLocation = $(this).val();
+                const areaDropdown = $("#area-observed-select");
+                areaDropdown.empty();
+
+                if (selectedLocation && areaObservedOptions[selectedLocation]) {
+                    areaDropdown.append('<option value="" disabled selected></option>');
+                    areaObservedOptions[selectedLocation].forEach(area => {
+                        areaDropdown.append(`<option value="${area}">${area}</option>`);
+                    });
+                } else {
+                    areaDropdown.append('<option value="" disabled selected></option>');
+                }
+                areaDropdown.trigger('change.select2');
+            });
+
+            $("#area-observed-select").change(function () {
+                checkFlowState();
+            });
+
+            $(document).ready(function () {
+                checkFlowState();
+                flatpickr("#date-picker", { dateFormat: "Y-m-d" });
             });
         });
     </script>
