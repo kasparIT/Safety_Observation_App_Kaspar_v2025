@@ -24,6 +24,19 @@
             </div>
         </div>
 
+        
+        {% if success_msg %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ success_msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% elif error_msg %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error_msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
         <form method="POST">
             <!-- Company and Employee Selection -->
             <div class="row">
@@ -206,5 +219,29 @@ $(document).ready(function () {
 });
 </script>
 
+
+<script>
+    setTimeout(function () {
+        const alertEl = document.querySelector('.alert');
+        if (alertEl) {
+            alertEl.classList.remove('show');
+            alertEl.classList.add('fade');
+            alertEl.style.opacity = '0';
+        }
+    }, 10000); // 10 seconds
+</script>
+
+<script>
+    setTimeout(function () {
+        const alertEl = document.querySelector('.alert');
+        if (alertEl) {
+            $(alertEl).slideUp(500, function () {
+                $(this).remove();
+            });
+        }
+    }, 10000); // 10 seconds
+</script>
 </body>
+
+
 </html>

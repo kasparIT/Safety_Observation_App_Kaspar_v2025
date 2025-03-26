@@ -1,6 +1,7 @@
 
-from flask import Blueprint, render_template, request, jsonify, redirect
+from flask import Blueprint, render_template, request, jsonify
 from app.database import get_db_connection
+from datetime import datetime
 
 main = Blueprint("main", __name__)
 
@@ -37,43 +38,45 @@ def home():
         area = request.form.get("area_observed")
         observation = request.form.get("observation")
         date_observed = request.form.get("date")
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         if not all([company, employee_id, overall_act, location, area, observation, date_observed]):
-            return "All fields are required", 400
+            error_msg = f"All fields are required. ({timestamp})"
+            return render_template("index.html", companies=companies, error_msg=error_msg)
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            # Lookup employee name
             cursor.execute("""
                 SELECT First_Name, Middle_Name, Last_Name
                 FROM dbo.Paylocity_Employee_Data
                 WHERE Employee_Id = ?
             """, (employee_id,))
             row = cursor.fetchone()
-
             if row:
                 first, middle, last = row
                 employee_name = f"{first} {middle + ' ' if middle else ''}{last}"
             else:
                 employee_name = "Unknown"
 
-            # Insert into the table
             cursor.execute("""
                 INSERT INTO dbo.SafetyObservationsApp_Revamp
                 (company, employee_id, employee_name, overall_act, location, area_observed, observation, date_observed)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (company, employee_id, employee_name, overall_act, location, area, observation, date_observed))
             conn.commit()
+
+            success_msg = f"Submission successful at {timestamp}"
+            return render_template("index.html", companies=companies, success_msg=success_msg)
+
         except Exception as e:
             print(f"❌ Error inserting submission: {e}")
-            return "Database error", 500
+            error_msg = f"Submission failed at {timestamp}"
+            return render_template("index.html", companies=companies, error_msg=error_msg)
         finally:
             cursor.close()
             conn.close()
-
-        return redirect("/")
 
     if conn:
         conn.close()
