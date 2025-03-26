@@ -103,144 +103,108 @@
         </form>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
-                minimumResultsForSearch: 6,
-                width: '100%'
-            });
+    
+<script>
+$(document).ready(function () {
+    // Flow enforcement
+    function checkFlowState() {
+        const companySelected = $("#company-select").val() !== "";
+        const employeeSelected = $("#employee-select").val() !== "";
+        const actSelected = $("input[name='overall_act']:checked").val() !== undefined;
+        const locationSelected = $("#location-select").val() !== "";
+        const areaSelected = $("#area-observed-select").val() !== "";
 
-            const areaObservedOptions = {
-                "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
-                "HFA": ["Production Floor", "Quality Control", "Warehouse"],
-                "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
-                "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
-                "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
-            };
+        $("#employee-select").prop("disabled", !companySelected);
+        $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
+        $("#location-select").prop("disabled", !actSelected);
+        $("#area-observed-select").prop("disabled", !locationSelected);
+        $("#observation-text").prop("disabled", !areaSelected);
+    }
 
-            $("#company-select").change(function() {
-                let selectedCompany = $(this).val();
-                let employeeDropdown = $("#employee-select");
+    $("#company-select").change(function () {
+        let selectedCompany = $(this).val();
+        let employeeDropdown = $("#employee-select");
 
-                if (selectedCompany) {
-                    $.ajax({
-                        url: "/get-employees",
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({ company: selectedCompany }),
-                        success: function(response) {
-                            employeeDropdown.empty().append('<option value="" disabled selected></option>');
-                            response.forEach(emp => {
-                                employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
-                            });
-                            employeeDropdown.prop("disabled", false);
-                            employeeDropdown.trigger('change.select2');
-                        }
+        employeeDropdown.empty().append('<option value="">Loading employees...</option>').prop("disabled", true);
+        checkFlowState();
+
+        if (selectedCompany) {
+            $.ajax({
+                url: "/get-employees",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ company: selectedCompany }),
+                success: function (response) {
+                    employeeDropdown.empty().append('<option value="" disabled selected></option>');
+                    response.forEach(emp => {
+                        employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
                     });
-                } else {
-                    employeeDropdown.empty().append('<option value="" disabled selected></option>').prop("disabled", true);
-                    employeeDropdown.trigger('change.select2');
+                    employeeDropdown.prop("disabled", false).trigger('change.select2');
+                    checkFlowState();
+                },
+                error: function () {
+                    employeeDropdown.empty().append('<option value="">Failed to load</option>');
                 }
             });
+        }
+    });
 
-            function checkEmployeeSelected() {
-                let employeeSelected = $("#employee-select").val() !== "";
-                $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
-            }
+    $("#employee-select").change(function () {
+        $("input[name='overall_act']").prop("checked", false);
+        checkFlowState();
+    });
 
-            $("#employee-select").change(function() {
-                let selected = $(this).val();
-                $("#observation-text").prop("disabled", selected === "");
-                checkEmployeeSelected();
+    $("input[name='overall_act']").change(function () {
+        $("#location-select").val("").trigger("change.select2");
+        checkFlowState();
+    });
+
+    $("#location-select").change(function () {
+        const selectedLocation = $(this).val();
+        const areaDropdown = $("#area-observed-select");
+        areaDropdown.empty();
+
+        const areaObservedOptions = {
+            "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
+            "HFA": ["Production Floor", "Quality Control", "Warehouse"],
+            "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
+            "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
+            "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
+        };
+
+        if (selectedLocation && areaObservedOptions[selectedLocation]) {
+            areaDropdown.append('<option value="" disabled selected></option>');
+            areaObservedOptions[selectedLocation].forEach(area => {
+                areaDropdown.append(`<option value="${area}">${area}</option>`);
             });
+            areaDropdown.prop("disabled", false);
+        } else {
+            areaDropdown.append('<option value="" disabled selected></option>').prop("disabled", true);
+        }
 
-            $("#observation-text").on("input", function() {
-                let filled = $(this).val().trim() !== "";
-                $("#location-select").prop("disabled", !filled);
-            });
+        areaDropdown.trigger('change.select2');
+        checkFlowState();
+    });
 
-            $("#location-select").change(function() {
-                let selectedLocation = $(this).val();
-                let areaDropdown = $("#area-observed-select");
-                areaDropdown.empty();
+    $("#area-observed-select").change(function () {
+        checkFlowState();
+    });
 
-                if (selectedLocation && areaObservedOptions[selectedLocation]) {
-                    areaDropdown.append('<option value="" disabled selected></option>');
-                    areaObservedOptions[selectedLocation].forEach(area => {
-                        areaDropdown.append(`<option value="${area}">${area}</option>`);
-                    });
-                    areaDropdown.prop("disabled", false);
-                } else {
-                    areaDropdown.append('<option value="" disabled selected></option>').prop("disabled", true);
-                }
-                areaDropdown.trigger('change.select2');
-            });
+    // Apply calendar
+    flatpickr("#date-picker", {
+        dateFormat: "Y-m-d"
+    });
 
-            function checkFlowState() {
-                const companySelected = $("#company-select").val() !== "";
-                const employeeSelected = $("#employee-select").val() !== "";
-                const actSelected = $("input[name='overall_act']:checked").val() !== undefined;
-                const locationSelected = $("#location-select").val() !== "";
-                const areaSelected = $("#area-observed-select").val() !== "";
+    // Initialize Select2
+    $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
+        minimumResultsForSearch: 6,
+        width: '100%'
+    });
 
-                $("#employee-select").prop("disabled", !companySelected);
-                $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
-                $("#location-select").prop("disabled", !actSelected);
-                $("#area-observed-select").prop("disabled", !locationSelected);
-                $("#observation-text").prop("disabled", !areaSelected);
-            }
+    // Initial state
+    checkFlowState();
+});
+</script>
 
-            $("#company-select").change(function () {
-                $("#employee-select").val("").trigger("change.select2");
-                checkFlowState();
-            });
-
-            $("#employee-select").change(function () {
-                $("input[name='overall_act']").prop("checked", false);
-                checkFlowState();
-            });
-
-            $("input[name='overall_act']").change(function () {
-                $("#location-select").val("").trigger("change.select2");
-                checkFlowState();
-            });
-
-            $("#location-select").change(function () {
-                $("#area-observed-select").val("").trigger("change.select2");
-                checkFlowState();
-
-                const areaObservedOptions = {
-                    "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
-                    "HFA": ["Production Floor", "Quality Control", "Warehouse"],
-                    "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
-                    "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
-                    "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
-                };
-
-                const selectedLocation = $(this).val();
-                const areaDropdown = $("#area-observed-select");
-                areaDropdown.empty();
-
-                if (selectedLocation && areaObservedOptions[selectedLocation]) {
-                    areaDropdown.append('<option value="" disabled selected></option>');
-                    areaObservedOptions[selectedLocation].forEach(area => {
-                        areaDropdown.append(`<option value="${area}">${area}</option>`);
-                    });
-                } else {
-                    areaDropdown.append('<option value="" disabled selected></option>');
-                }
-                areaDropdown.trigger('change.select2');
-            });
-
-            $("#area-observed-select").change(function () {
-                checkFlowState();
-            });
-
-            $(document).ready(function () {
-                checkFlowState();
-                flatpickr("#date-picker", { dateFormat: "Y-m-d" });
-            });
-        });
-    </script>
 </body>
 </html>
