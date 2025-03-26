@@ -14,19 +14,19 @@
 </head>
 <body>
     <div class="container">
-        <!-- Logo Left, Title Centered -->
+        <!-- Header with Logo and Title -->
         <div class="form-header">
-            <img src="{{ url_for('static', filename='images/kbs_logo.png') }}" alt="Company Logo" class="logo">
+            <img src="{{ url_for('static', filename='images/kbs_logo.png') }}" alt="KBS Logo" class="logo">
             <div class="title-container">
                 <h1>Safety Observation Form</h1>
             </div>
         </div>
 
         <form method="POST">
-            <!-- Row 1: Company & Employee Name -->
+            <!-- Company and Employee Selection -->
             <div class="row">
                 <div class="col-md-6">
-                    <label>Company:</label>
+                    <label for="company-select">Company:</label>
                     <select name="company" id="company-select" class="form-control">
                         <option value="">Select a Company</option>
                         {% for abbr, full_name in companies %}
@@ -35,7 +35,7 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label>Employee Name:</label>
+                    <label for="employee-select">Employee Name:</label>
                     <select name="employee" id="employee-select" class="form-control" disabled>
                         <option value="">Select a Company First</option>
                     </select>
@@ -44,14 +44,14 @@
 
             <!-- Observation Text Area -->
             <div class="form-group">
-                <label>Observation:</label>
+                <label for="observation-text">Observation:</label>
                 <textarea name="observation" id="observation-text" class="form-control" disabled></textarea>
             </div>
 
-            <!-- Row 2: Location & Area Observed -->
+            <!-- Location and Area Observed -->
             <div class="row">
                 <div class="col-md-6">
-                    <label>Location:</label>
+                    <label for="location-select">Location:</label>
                     <select name="location" id="location-select" class="form-control" disabled>
                         <option value="">Select a Location</option>
                         <option value="KPI">KPI</option>
@@ -62,40 +62,48 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label>Area Observed:</label>
+                    <label for="area-observed-select">Area Observed:</label>
                     <select name="area_observed" id="area-observed-select" class="form-control" disabled>
                         <option value="">Select a Location First</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Overall Act -->
-            <div class="form-group">
-                <label>Overall Act:</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
-                    <label class="form-check-label" for="safe-act">Safe Act</label>
+            <!-- Overall Act and Date in Same Row -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Overall Act:</label>
+                    <div class="radio-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
+                            <label class="form-check-label" for="safe-act">Safe Act</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
+                            <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
-                    <label class="form-check-label" for="unsafe-act">Unsafe Act</label>
+                <div class="col-md-6">
+                    <label for="date-picker">Date Observed:</label>
+                    <input type="text" id="date-picker" name="date" class="form-control">
                 </div>
             </div>
 
-            <!-- Date Picker (Hidden Until Clicked) -->
-            <div class="form-group">
-                <label>Date Observed:</label>
-                <input type="text" id="date-picker" name="date" class="form-control">
+            <!-- Submit Button -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit</button>
             </div>
-
-            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
 
     <script>
         $(document).ready(function() {
             // Enable select2 for better dropdown UX
-            $("#company-select, #employee-select").select2();
+            $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
+                minimumResultsForSearch: 6,
+                width: '100%'
+            });
 
             // Hardcoded mapping of Locations to Areas
             const areaObservedOptions = {
@@ -123,10 +131,12 @@
                                 employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
                             });
                             employeeDropdown.prop("disabled", false);
+                            employeeDropdown.trigger('change.select2');
                         }
                     });
                 } else {
                     employeeDropdown.empty().append('<option value="">Select a Company First</option>').prop("disabled", true);
+                    employeeDropdown.trigger('change.select2');
                 }
             });
 
@@ -157,6 +167,7 @@
                 } else {
                     areaDropdown.append('<option value="">Select a Location First</option>').prop("disabled", true);
                 }
+                areaDropdown.trigger('change.select2');
             });
 
             // Initialize Calendar (Show on Click)
