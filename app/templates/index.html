@@ -85,6 +85,8 @@
                         <option value="IT Security">IT Security</option>
                         <option value="TBE">TBE</option>
                         <option value="TPM">TPM</option>
+                        <option value="KCI">KCI</option>
+                        <option value="CY">CY</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -178,11 +180,97 @@ $(document).ready(function () {
         areaDropdown.empty();
 
         const areaObservedOptions = {
-            "KPI": ["Welding Shop", "Office", "Parts Room", "Wood Shop", "Mechanic Shop", "Parking Bay"],
-            "HFA": ["Production Floor", "Quality Control", "Warehouse"],
-            "IT Security": ["Unlocked/Unattended Computers", "Unauthorized Access", "Security Policy Violations"],
-            "TBE": ["Manufacturing", "Paint Shop", "Shipping Department"],
-            "TPM": ["Gold Processing", "Inventory Storage", "Packaging Area"]
+            "KPI": [
+                "Welding shop",
+                "Office",
+                "Parts room",
+                "Wood shop",
+                "Mechanic shop",
+                "Parking bay"
+            ],
+            "HFA": [
+                "Production Floor",
+                "Quality Control",
+                "Warehouse",
+                "HFA-Office",
+                "IOTA-Plotter",
+                "IOTA-Molding",
+                "IOTA-Demold",
+                "IOTA-HAAS Machine",
+                "IOTA-FADAL Machine",
+                "IOTA-Finishing",
+                "IOTA-Paint",
+                "IOTA-Engineering",
+                "IOTA-Mixing",
+                "IOTA-Inventory",
+                "Stiller",
+                "Other"
+            ],
+            "IT Security": [
+                "Unlocked/Unattended Computers",
+                "Unauthorized Access",
+                "Security Policy Violations",
+                "Phishing Email",
+                "Uncovered drink",
+                "Exposed wiring/devices",
+                "Password Exposed"
+            ],
+            "TBE": [
+                "Manufacturing",
+                "Paint Shop",
+                "Shipping Department",
+                "Assembly",
+                "Blast and prep",
+                "Material handler",
+                "Paint",
+                "Shipping",
+                "Fabrication",
+                "Welding",
+                "Office",
+                "Engineering"
+            ],
+            "TPM": [
+                "Office",
+                "Depository"
+            ],
+            "KCI": [
+                "Accounting",
+                "Purchasing",
+                "Payroll",
+                "IT",
+                "Human Resources",
+                "Executive",
+                "KPO",
+                "Other"
+            ],
+            "CY": [
+                "CY DL Bits",
+                "CY DL Cutting Room",
+                "CY DL Pads",
+                "CY DL Saddles",
+                "CY DL Tack",
+                "CY Shipping",
+                "CY RM Warehouse",
+                "CY Repair Saddles",
+                "CY Accounting",
+                "CY IT Dept",
+                "CY Planning",
+                "CY Marketing",
+                "CY Purchasing",
+                "CY Product Development",
+                "CY Sales",
+                "CY Sale Staff",
+                "CY ADM Staff",
+                "CY MFG Staff",
+                "CY Maintenance",
+                "CY Customer Service",
+                "CY Engineering",
+                "HTA Marketing",
+                "PST Direct Labor",
+                "PST RM Warehouse",
+                "PST Staff",
+                "SSR Customer Service"
+            ]
         };
 
         if (selectedLocation && areaObservedOptions[selectedLocation]) {
