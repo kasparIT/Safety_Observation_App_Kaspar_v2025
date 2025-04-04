@@ -1,11 +1,10 @@
-
 /* Base Styling */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f4f7fc;
-    margin: 0;
+    margin:.0;
     padding: 0;
 }
 
@@ -138,27 +137,106 @@ textarea {
     transform: translateY(-1px);
 }
 
-/* Select2 Styling */
+/* Select2 Styling - IMPROVED FOR BETTER ALIGNMENT */
 .select2-container .select2-selection--single {
     height: 42px;
-    padding: 6px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 42px;
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444;
+    line-height: 42px; /* Match the height of the select container */
+    padding-left: 14px; /* Match the padding of other form elements */
+    padding-right: 20px; /* Space for the dropdown arrow */
 }
 
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 30px;
-    color: #444;
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px;
+    width: 30px;
+    right: 3px;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 8px 14px;
+    font-size: 14px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0056d2;
+}
+
+.select2-dropdown {
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix dropdown width to match container */
+.select2-container {
+    width: 100% !important;
+}
+
+/* Placeholder styling */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #999;
+}
+
+/* Date picker styling */
+.flatpickr-input {
+    background-color: #fff !important;
 }
 
 /* Consistent input vertical alignment fix */
 select, textarea, input[type="text"] {
     vertical-align: middle;
     line-height: 1.5;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    height: 42px; /* Fixed height for better alignment */
+}
+
+/* Make sure textarea keeps its height */
+textarea {
+    height: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Alert styling */
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.btn-close {
+    float: right;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.5;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+/* Disabled state styling */
+select:disabled, textarea:disabled, input[type="text"]:disabled,
+input[type="radio"]:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
