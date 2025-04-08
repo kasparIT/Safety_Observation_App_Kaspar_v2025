@@ -80,13 +80,14 @@
                     <label for="location-select">Location of the Observation:</label>
                     <select name="location" id="location-select" class="form-control" disabled>
                         <option value="" disabled selected></option>
-                        <option value="KPI">KPI</option>
-                        <option value="HFA">HFA</option>
                         <option value="IT Security">IT Security</option>
-                        <option value="TBE">TBE</option>
-                        <option value="TPM">TPM</option>
-                        <option value="KCI">KCI</option>
-                        <option value="CY">CY</option>
+                        <option value="KPI">KPI - Kaspar Properties</option>
+                        <option value="HFA">HFA - Kaspar Outdoors</option>
+                        <option value="TBE">TBE - Bedrock Truck Beds</option>
+                        <option value="TPM">TPM - Texas Precious Metals</option>
+                        <option value="KCI">KCI - Kaspar Companies</option>
+                        <option value="CY">WHL - Circle Y Saddle & Precision Saddle Tree</option>
+                        <option value="Off-site">Off-site</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -187,6 +188,9 @@ $(document).ready(function () {
                 "Wood shop",
                 "Mechanic shop",
                 "Parking bay"
+            ],
+            "Off-site": [
+                "Other"
             ],
             "HFA": [
                 "Production Floor",

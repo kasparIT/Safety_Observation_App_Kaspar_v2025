@@ -6,9 +6,9 @@ from datetime import datetime
 main = Blueprint("main", __name__)
 
 COMPANY_NAME_MAPPING = {
-    "HFA": "HFA - Horizon Firearms",
+    "HFA": "HFA - Kaspar Outdoors",
     "KCI": "KCI - Kaspar Companies Inc.",
-    "KPI": "KPI - Kaspar Property",
+    "KPI": "KPI - Kaspar Properties",
     "TA": "TA - Texas Ammunition",
     "TBE": "TBE - Bedrock Truck Beds",
     "TPM": "TPM - Texas Precious Metals",
