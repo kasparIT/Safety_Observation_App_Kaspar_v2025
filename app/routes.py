@@ -3,6 +3,13 @@ from flask import Blueprint, render_template, request, jsonify
 from app.database import get_db_connection
 from datetime import datetime
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+EMAINT_URL = os.getenv("EMAINT_URL")
+
+
 main = Blueprint("main", __name__)
 
 COMPANY_NAME_MAPPING = {
@@ -68,7 +75,7 @@ def home():
             conn.commit()
 
             success_msg = f"Submission successful at {timestamp}"
-            return render_template("index.html", companies=companies, success_msg=success_msg)
+            return render_template("index.html", companies=companies, success_msg=success_msg, emaint_url=EMAINT_URL)
 
         except Exception as e:
             print(f"❌ Error inserting submission: {e}")
