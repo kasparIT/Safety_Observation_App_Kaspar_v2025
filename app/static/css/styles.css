@@ -461,3 +461,86 @@ input[type="radio"]:disabled {
     border: 1px solid #ced4da;
     border-radius: 0 0.25rem 0.25rem 0;
 }
+
+/* NEW RESPONSIVE IMPROVEMENTS */
+
+/* Improve mobile responsiveness */
+@media (max-width: 768px) {
+  /* Better form layout on tablets */
+  .row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* Improve date picker on mobile */
+  .input-group {
+    flex-wrap: nowrap;
+  }
+  
+  /* Better modal responsiveness */
+  .modal-dialog {
+    margin: 10px;
+  }
+  
+  /* Improve action buttons in success modal */
+  .d-flex.justify-content-center.flex-wrap.gap-3 {
+    flex-direction: column;
+  }
+  
+  .d-flex.justify-content-center.flex-wrap.gap-3 .btn {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+}
+
+/* Improve tiny screens (iPhone SE, etc) */
+@media (max-width: 375px) {
+  .container {
+    padding: 15px;
+    margin: 10px auto;
+  }
+  
+  /* Improve radio buttons on tiny screens */
+  .radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-check-label {
+    padding: 8px 12px;
+  }
+}
+
+/* Ensure date picker appears above other elements */
+.flatpickr-calendar {
+  z-index: 1060 !important;
+}
+
+/* Fix for modal on mobile */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+/* Improve Select2 on mobile */
+@media (max-width: 576px) {
+  .select2-container .select2-selection--single {
+    height: 38px;
+  }
+  
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+  }
+}
+
+/* Ensure form fields are accessible */
+select, textarea, input[type="text"], .form-check-input {
+  touch-action: manipulation;
+}
+
+/* Fix for iOS modal */
+body.modal-open-ios {
+  position: fixed;
+  width: 100%;
+}
