@@ -2,3 +2,4 @@ __pycache__
 .env
 .venv
 venv
+DO_NOT_RUN_ONLY_AZURE_apply_ip_restrictions.sh
