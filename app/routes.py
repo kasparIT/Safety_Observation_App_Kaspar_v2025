@@ -69,9 +69,39 @@ def home():
         date_observed = request.form.get("date")
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+        # Keep form data to maintain state if validation fails
+        form_data = {
+            "company": company,
+            "employee_id": employee_id,
+            "overall_act": overall_act,
+            "location": location,
+            "area_observed": area,
+            "observation": observation,
+            "date_observed": date_observed
+        }
+
         if not all([company, employee_id, overall_act, location, area, observation, date_observed]):
             error_msg = f"All fields are required. ({timestamp})"
-            return render_template("index.html", companies=companies, error_msg=error_msg)
+            
+            # Get employee name for form preservation
+            employee_name = None
+            if employee_id and conn:
+                cursor = conn.cursor()
+                try:
+                    cursor.execute("""
+                        SELECT First_Name, Middle_Name, Last_Name
+                        FROM dbo.Paylocity_Employee_Data
+                        WHERE Employee_Id = ?
+                    """, (employee_id,))
+                    row = cursor.fetchone()
+                    if row:
+                        first, middle, last = row
+                        employee_name = f"{first} {middle + ' ' if middle else ''}{last}"
+                finally:
+                    cursor.close()
+            
+            return render_template("index.html", companies=companies, error_msg=error_msg,
+                                  form_data=form_data, employee_name=employee_name)
 
         try:
             conn = get_db_connection()
@@ -116,7 +146,7 @@ def home():
         except Exception as e:
             print(f"❌ Error inserting submission: {e}")
             error_msg = f"Submission failed at {timestamp}"
-            return render_template("index.html", companies=companies, error_msg=error_msg)
+            return render_template("index.html", companies=companies, error_msg=error_msg, form_data=form_data)
         finally:
             cursor.close()
             conn.close()

@@ -40,14 +40,17 @@
                     <select name="company" id="company-select" class="form-control">
                         <option value="" disabled selected></option>
                         {% for abbr, full_name in companies %}
-                            <option value="{{ abbr }}">{{ full_name }}</option>
+                            <option value="{{ abbr }}" {% if form_data and form_data.company == abbr %}selected{% endif %}>{{ full_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label for="employee-select">Employee Name:</label>
-                    <select name="employee" id="employee-select" class="form-control" disabled>
+                    <select name="employee" id="employee-select" class="form-control" {% if not form_data or not form_data.company %}disabled{% endif %}>
                         <option value="" disabled selected></option>
+                        {% if form_data and form_data.employee_id %}
+                            <option value="{{ form_data.employee_id }}" selected>{{ employee_name }}</option>
+                        {% endif %}
                     </select>
                 </div>
             </div>
@@ -58,11 +61,15 @@
                     <label>Overall Act:</label>
                     <div class="radio-group justify-content-start" style="gap: 40px; margin-top: 6px;">
                         <label class="form-check-label d-flex align-items-center">
-                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Safe Act" id="safe-act" disabled>
+                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Safe Act" id="safe-act" 
+                                {% if not form_data or not form_data.employee_id %}disabled{% endif %}
+                                {% if form_data and form_data.overall_act == "Safe Act" %}checked{% endif %}>
                             Safe Act
                         </label>
                         <label class="form-check-label d-flex align-items-center">
-                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" disabled>
+                            <input class="form-check-input me-2" type="radio" name="overall_act" value="Unsafe Act" id="unsafe-act" 
+                                {% if not form_data or not form_data.employee_id %}disabled{% endif %}
+                                {% if form_data and form_data.overall_act == "Unsafe Act" %}checked{% endif %}>
                             Unsafe Act
                         </label>
                     </div>
@@ -73,22 +80,27 @@
             <div class="row">
                 <div class="col-md-6">
                     <label for="location-select">Location of the Observation:</label>
-                    <select name="location" id="location-select" class="form-control" disabled>
+                    <select name="location" id="location-select" class="form-control" 
+                        {% if not form_data or not form_data.overall_act %}disabled{% endif %}>
                         <option value="" disabled selected></option>
-                        <option value="IT Security">IT Security</option>
-                        <option value="KPI">KPI - Kaspar Properties</option>
-                        <option value="HFA">HFA - Kaspar Outdoors</option>
-                        <option value="TBE">TBE - Bedrock Truck Beds</option>
-                        <option value="TPM">TPM - Texas Precious Metals</option>
-                        <option value="KCI">KCI - Kaspar Companies</option>
-                        <option value="CY">WHL - Circle Y Saddle & Precision Saddle Tree</option>
-                        <option value="Off-site">Off-site</option>
+                        <option value="IT Security" {% if form_data and form_data.location == "IT Security" %}selected{% endif %}>IT Security</option>
+                        <option value="KPI" {% if form_data and form_data.location == "KPI" %}selected{% endif %}>KPI - Kaspar Properties</option>
+                        <option value="HFA" {% if form_data and form_data.location == "HFA" %}selected{% endif %}>HFA - Kaspar Outdoors</option>
+                        <option value="TBE" {% if form_data and form_data.location == "TBE" %}selected{% endif %}>TBE - Bedrock Truck Beds</option>
+                        <option value="TPM" {% if form_data and form_data.location == "TPM" %}selected{% endif %}>TPM - Texas Precious Metals</option>
+                        <option value="KCI" {% if form_data and form_data.location == "KCI" %}selected{% endif %}>KCI - Kaspar Companies</option>
+                        <option value="CY" {% if form_data and form_data.location == "CY" %}selected{% endif %}>WHL - Circle Y Saddle & Precision Saddle Tree</option>
+                        <option value="Off-site" {% if form_data and form_data.location == "Off-site" %}selected{% endif %}>Off-site</option>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label for="area-observed-select">Area/Department where Observed:</label>
-                    <select name="area_observed" id="area-observed-select" class="form-control" disabled>
+                    <select name="area_observed" id="area-observed-select" class="form-control" 
+                        {% if not form_data or not form_data.location %}disabled{% endif %}>
                         <option value="" disabled selected></option>
+                        {% if form_data and form_data.area_observed %}
+                            <option value="{{ form_data.area_observed }}" selected>{{ form_data.area_observed }}</option>
+                        {% endif %}
                     </select>
                 </div>
             </div>
@@ -96,14 +108,15 @@
             <!-- Observation Text Area -->
             <div class="form-group">
                 <label for="observation-text">Observation:</label>
-                <textarea name="observation" id="observation-text" class="form-control" disabled></textarea>
+                <textarea name="observation" id="observation-text" class="form-control" 
+                    {% if not form_data or not form_data.area_observed %}disabled{% endif %}>{{ form_data.observation if form_data else "" }}</textarea>
             </div>
 
             <!-- Date Picker -->
             <div class="row">
                 <div class="col-md-6">
                     <label for="date-picker">Date Observed:</label>
-                    <input type="text" id="date-picker" name="date" class="form-control">
+                    <input type="text" id="date-picker" name="date" class="form-control" value="{{ form_data.date_observed if form_data else "" }}">
                 </div>
             </div>
 
@@ -157,6 +170,12 @@ $(document).ready(function () {
                     response.forEach(emp => {
                         employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
                     });
+                    
+                    // If we have form data, select the correct employee
+                    {% if form_data and form_data.employee_id %}
+                    employeeDropdown.val("{{ form_data.employee_id }}");
+                    {% endif %}
+                    
                     employeeDropdown.prop("disabled", false).trigger('change.select2');
                     checkFlowState();
                 },
@@ -168,12 +187,16 @@ $(document).ready(function () {
     });
 
     $("#employee-select").change(function () {
+        {% if not form_data %}
         $("input[name='overall_act']").prop("checked", false);
+        {% endif %}
         checkFlowState();
     });
 
     $("input[name='overall_act']").change(function () {
+        {% if not form_data %}
         $("#location-select").val("").trigger("change.select2");
+        {% endif %}
         checkFlowState();
     });
 
@@ -282,7 +305,8 @@ $(document).ready(function () {
         if (selectedLocation && areaObservedOptions[selectedLocation]) {
             areaDropdown.append('<option value="" disabled selected></option>');
             areaObservedOptions[selectedLocation].forEach(area => {
-                areaDropdown.append(`<option value="${area}">${area}</option>`);
+                const isSelected = {% if form_data and form_data.area_observed %}area === "{{ form_data.area_observed }}"{% else %}false{% endif %};
+                areaDropdown.append(`<option value="${area}" ${isSelected ? 'selected' : ''}>${area}</option>`);
             });
             areaDropdown.prop("disabled", false);
         } else {
@@ -308,8 +332,19 @@ $(document).ready(function () {
         width: '100%'
     });
 
-    // Initial state
+    // Initial state check and trigger changes
     checkFlowState();
+    
+    // If we have form data, trigger appropriate cascading changes
+    {% if form_data and form_data.company %}
+    $("#company-select").trigger("change");
+    {% endif %}
+    
+    {% if form_data and form_data.location %}
+    setTimeout(function() {
+        $("#location-select").trigger("change");
+    }, 500);
+    {% endif %}
 });
 </script>
 
