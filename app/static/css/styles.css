@@ -337,7 +337,6 @@ input[type="radio"]:disabled {
     border-radius: 8px;
 }
 
-
 /* Custom yellow button for Emaint */
 .btn-emaint {
     background-color: #fff8dc; /* light yellow */
@@ -354,4 +353,72 @@ input[type="radio"]:disabled {
     background-color: #ffe39f;
     color: #3e2c00;
     transform: translateY(-1px);
+}
+
+/* Notify Supervisor Button Styling */
+.btn-notify {
+    background-color: #ff9800;
+    color: white;
+    transition: all 0.2s ease;
+    border: none;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
+}
+
+.btn-notify:hover {
+    background-color: #e68a00;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3);
+}
+
+.btn-notify:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+}
+
+.btn-notify.sent {
+    background-color: #28a745;
+    pointer-events: none;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.btn-notify .notify-text {
+    display: inline-block;
+}
+
+.btn-notify .sent-text {
+    display: none;
+}
+
+.btn-notify.sent .notify-text {
+    display: none;
+}
+
+.btn-notify.sent .sent-text {
+    display: inline-block;
+}
+
+.loading-spinner {
+    width: 1.2rem;
+    height: 1.2rem;
+    display: none;
+    vertical-align: text-bottom;
+}
+
+.btn-notify.loading .loading-spinner {
+    display: inline-block;
+}
+
+.btn-notify.loading .notify-text {
+    display: none;
+}
+
+.btn-notify.loading {
+    background-color: #ff9800;
+    opacity: 0.8;
+    cursor: wait;
 }
