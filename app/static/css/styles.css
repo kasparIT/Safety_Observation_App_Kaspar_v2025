@@ -422,3 +422,10 @@ input[type="radio"]:disabled {
     opacity: 0.8;
     cursor: wait;
 }
+
+/* Style for supervisor name */
+.supervisor-name {
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 3px;
+}

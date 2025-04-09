@@ -343,11 +343,11 @@ $(document).ready(function () {
           <button type="button" class="btn btn-notify" id="send-to-supervisor">
             <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true"></span>
             <span class="notify-text"><i class="bi bi-envelope-fill me-2"></i>Notify Supervisor</span>
-            <span class="sent-text"><i class="bi bi-check-circle-fill me-2"></i>Supervisor Notified</span>
+            <span class="sent-text"><i class="bi bi-check-circle-fill me-2"></i>Supervisor Notified <span class="supervisor-name"></span></span>
           </button>
           
           <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint">
-            <i class="bi bi-tools me-2"></i>Submit to Emaint
+            <i class="bi bi-tools me-2"></i>Start a Maintenance Request
           </a>
           
           <button type="button" class="btn btn-success" id="submit-another">
@@ -394,6 +394,14 @@ $(document).ready(function () {
             .done(function (response) {
                 // Success state
                 $btn.removeClass('loading').addClass('sent');
+                
+                // Display supervisor name if available
+                if (response.message && response.message.includes("Email sent to")) {
+                    // Extract supervisor name from the message
+                    const supervisorName = response.message.replace("Email sent to ", "");
+                    $btn.find('.supervisor-name').text('(' + supervisorName + ')');
+                }
+                
                 setTimeout(function() {
                     $btn.prop('disabled', false);
                 }, 2000);
