@@ -13,6 +13,57 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script> 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <style>
+        /* Additional styles for the modal and buttons */
+        .btn-notify {
+            background-color: #ff9800;
+            color: white;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-notify:hover {
+            background-color: #e68a00;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-notify.sent {
+            background-color: #28a745;
+            pointer-events: none;
+        }
+        
+        .btn-notify .notify-text {
+            display: inline-block;
+        }
+        
+        .btn-notify .sent-text {
+            display: none;
+        }
+        
+        .btn-notify.sent .notify-text {
+            display: none;
+        }
+        
+        .btn-notify.sent .sent-text {
+            display: inline-block;
+        }
+        
+        .loading-spinner {
+            width: 1.2rem;
+            height: 1.2rem;
+            display: none;
+            vertical-align: text-bottom;
+        }
+        
+        .btn-notify.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        .btn-notify.loading .notify-text {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -329,36 +380,39 @@ $(document).ready(function () {
 <div class="modal fade" id="postSubmitModal" tabindex="-1" data-employee-id="{{ employee_id }}" aria-labelledby="postSubmitModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-<canvas id="confetti-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1056;"></canvas>
-      <div class="modal-body text-center">
-        <div>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="#28a745" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+      <canvas id="confetti-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1056;"></canvas>
+      <div class="modal-body text-center py-4">
+        <div class="mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#28a745" class="bi bi-check-circle-fill" viewBox="0 0 16 16" style="width: 64px; height: 64px;">
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07 0l3.992-3.992a.75.75 0 1 0-1.06-1.06L7.5 9.439 5.53 7.47a.75.75 0 1 0-1.06 1.06l2.5 2.5z"/>
           </svg>
         </div>
-        <h4>Thank you, {{ employee_name }}!</h4>
-        <p>Your observation was submitted successfully at <strong>{{ success_msg.split('at')[1] if success_msg }}</strong></p>
-        <div class="modal-footer d-flex justify-content-center flex-wrap gap-3">
-<button type="button" class="btn btn-warning" id="send-to-supervisor">
-  <i class="bi bi-envelope-fill me-2"></i> Notify Supervisor
-</button>
-          <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint"><i class="bi bi-tools me-2"></i>Submit to Emaint</a>
-          <button type="button" class="btn btn-success" id="submit-another">Submit Another</button>
-          <button type="button" class="btn btn-secondary" id="exit-button">Exit</button>
-        <div class="alert alert-success mt-3 d-none text-center" id="email-success" role="alert">
-  <i class="bi bi-check-circle-fill me-2"></i>
-  Email sent to supervisor successfully!
-</div>
-</div>
+        <h4 class="text-success mb-3">Thank you, {{ employee_name }}!</h4>
+        <p class="mb-4">Your observation was submitted successfully at <strong>{{ success_msg.split('at')[1] if success_msg }}</strong></p>
+        
+        <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+          <button type="button" class="btn btn-notify" id="send-to-supervisor">
+            <span class="spinner-border spinner-border-sm loading-spinner" role="status" aria-hidden="true"></span>
+            <span class="notify-text"><i class="bi bi-envelope-fill me-2"></i>Notify Supervisor</span>
+            <span class="sent-text"><i class="bi bi-check-circle-fill me-2"></i>Supervisor Notified</span>
+          </button>
+          
+          <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint">
+            <i class="bi bi-tools me-2"></i>Submit to Emaint
+          </a>
+          
+          <button type="button" class="btn btn-success" id="submit-another">
+            <i class="bi bi-plus-circle me-2"></i>Submit Another
+          </button>
+          
+          <button type="button" class="btn btn-secondary" id="exit-button">
+            <i class="bi bi-box-arrow-right me-2"></i>Exit
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-  </div>
-</div>
-
-</div>
-
 
 <script>
 $(document).ready(function () {
@@ -375,17 +429,29 @@ $(document).ready(function () {
         }, 400);
     {% endif %}
 
-    // Notify supervisor - fixed version
+    // Improved Notify supervisor functionality
     $("#send-to-supervisor").click(function () {
+        if ($(this).hasClass('sent')) {
+            return; // Already sent, do nothing
+        }
+        
+        const $btn = $(this);
         const employeeId = $("#postSubmitModal").data("employee-id");
-        console.log("Sending notification for employee ID:", employeeId);
+        
+        // Show loading state
+        $btn.addClass('loading').prop('disabled', true);
         
         $.post("/notify-supervisor", { employee_id: employeeId })
             .done(function () {
-                $("#email-success").removeClass("d-none").hide().fadeIn();
-                setTimeout(() => $("#email-success").fadeOut(), 4000);
+                // Success state
+                $btn.removeClass('loading').addClass('sent');
+                setTimeout(function() {
+                    $btn.prop('disabled', false);
+                }, 2000);
             })
             .fail(function (xhr, status, error) {
+                // Error state
+                $btn.removeClass('loading').prop('disabled', false);
                 console.error("Notification failed:", xhr.responseText);
                 alert("Failed to send email to supervisor. Please try again.");
             });
@@ -403,7 +469,6 @@ $(document).ready(function () {
         // Re-trigger logic to activate dependent fields
         $("#employee-select").trigger('change');
     });
-
 
     $("#exit-button").click(function () {
         window.open('', '_self');
