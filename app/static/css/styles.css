@@ -336,3 +336,22 @@ input[type="radio"]:disabled {
     font-weight: 500;
     border-radius: 8px;
 }
+
+
+/* Custom yellow button for Emaint */
+.btn-emaint {
+    background-color: #fff8dc; /* light yellow */
+    color: #5c3d00;
+    border: 1px solid #ffe39f;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-emaint:hover {
+    background-color: #ffe39f;
+    color: #3e2c00;
+    transform: translateY(-1px);
+}
