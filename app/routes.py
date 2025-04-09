@@ -1,8 +1,8 @@
-
 from flask import Blueprint, render_template, request, jsonify
 from app.database import get_db_connection
 from datetime import datetime
-
+import smtplib
+from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
 
@@ -75,7 +75,8 @@ def home():
             conn.commit()
 
             success_msg = f"Submission successful at {timestamp}"
-            return render_template("index.html", companies=companies, success_msg=success_msg, emaint_url=EMAINT_URL, employee_name=employee_name)
+            return render_template("index.html", companies=companies, success_msg=success_msg, 
+                                  emaint_url=EMAINT_URL, employee_name=employee_name, employee_id=employee_id)
 
         except Exception as e:
             print(f"❌ Error inserting submission: {e}")
@@ -117,3 +118,61 @@ def get_employees():
             conn.close()
 
     return jsonify(employees)
+
+
+@main.route("/notify-supervisor", methods=["POST"])
+def notify_supervisor():
+    print("🔔 Received notify-supervisor request")
+    
+    # Get employee_id from form data
+    employee_id = request.form.get("employee_id")
+    print(f"📥 employee_id received: {employee_id}")
+    
+    if not employee_id:
+        print("❌ Missing employee_id in request")
+        return jsonify({"success": False, "error": "Missing employee_id"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        print("❌ Failed to connect to database")
+        return jsonify({"success": False, "error": "Database connection failed"}), 500
+        
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Supervisor_Work_Email, First_Name, Last_Name FROM dbo.Paylocity_Employee_Data WHERE Employee_Id = ?", (employee_id,))
+        row = cursor.fetchone()
+        print(f"🧠 DB Lookup result: {row}")
+        
+        if not row or not row[0]:
+            print(f"❌ No supervisor email found for employee ID: {employee_id}")
+            return jsonify({"success": False, "error": "No supervisor email found"}), 404
+
+        supervisor_email, first, last = row
+        employee_name = f"{first} {last}"
+
+        # Setup email message
+        msg = EmailMessage()
+        msg["Subject"] = f"New Safety Observation for {employee_name}"
+        msg["From"] = os.getenv("EMAIL_USERNAME")
+        msg["To"] = supervisor_email
+        msg.set_content(f"A safety observation was submitted for {employee_name}. Please check the system for full details.")
+
+        # Send email
+        try:
+            with smtplib.SMTP(os.getenv("EMAIL_HOST"), int(os.getenv("EMAIL_PORT", 587))) as smtp:
+                smtp.starttls()
+                smtp.login(os.getenv("EMAIL_USERNAME"), os.getenv("EMAIL_PASSWORD"))
+                print(f"📧 Sending email to {supervisor_email}...")
+                smtp.send_message(msg)
+                print("✅ Email sent successfully")
+        except Exception as email_error:
+            print(f"❌ Email sending failed: {email_error}")
+            return jsonify({"success": False, "error": str(email_error)}), 500
+
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"❌ Error in notify_supervisor: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()

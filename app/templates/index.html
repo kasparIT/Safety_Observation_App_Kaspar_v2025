@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
     <title>Safety Observation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
@@ -118,12 +117,13 @@
     
 <script>
 $(document).ready(function () {
-$('form').on('keydown', function (e) {
-    if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
-        e.preventDefault();
-        return false;
-    }
-});
+    $('form').on('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
     // Flow enforcement
     function checkFlowState() {
         const companySelected = $("#company-select").val() !== "";
@@ -318,17 +318,6 @@ $('form').on('keydown', function (e) {
     setTimeout(function () {
         const alertEl = document.querySelector('.alert');
         if (alertEl) {
-            alertEl.classList.remove('show');
-            alertEl.classList.add('fade');
-            alertEl.style.opacity = '0';
-        }
-    }, 10000); // 10 seconds
-</script>
-
-<script>
-    setTimeout(function () {
-        const alertEl = document.querySelector('.alert');
-        if (alertEl) {
             $(alertEl).slideUp(500, function () {
                 $(this).remove();
             });
@@ -337,7 +326,7 @@ $('form').on('keydown', function (e) {
 </script>
 
 <!-- Observation Submitted Modal -->
-<div class="modal fade" id="postSubmitModal" tabindex="-1" aria-labelledby="postSubmitModalLabel" aria-hidden="true">
+<div class="modal fade" id="postSubmitModal" tabindex="-1" data-employee-id="{{ employee_id }}" aria-labelledby="postSubmitModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
 <canvas id="confetti-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1056;"></canvas>
@@ -350,10 +339,17 @@ $('form').on('keydown', function (e) {
         <h4>Thank you, {{ employee_name }}!</h4>
         <p>Your observation was submitted successfully at <strong>{{ success_msg.split('at')[1] if success_msg }}</strong></p>
         <div class="modal-footer d-flex justify-content-center flex-wrap gap-3">
+<button type="button" class="btn btn-warning" id="send-to-supervisor">
+  <i class="bi bi-envelope-fill me-2"></i> Notify Supervisor
+</button>
           <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint"><i class="bi bi-tools me-2"></i>Submit to Emaint</a>
           <button type="button" class="btn btn-success" id="submit-another">Submit Another</button>
           <button type="button" class="btn btn-secondary" id="exit-button">Exit</button>
-        </div>
+        <div class="alert alert-success mt-3 d-none text-center" id="email-success" role="alert">
+  <i class="bi bi-check-circle-fill me-2"></i>
+  Email sent to supervisor successfully!
+</div>
+</div>
       </div>
     </div>
   </div>
@@ -366,16 +362,11 @@ $('form').on('keydown', function (e) {
 
 <script>
 $(document).ready(function () {
-$('form').on('keydown', function (e) {
-    if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
-        e.preventDefault();
-        return false;
-    }
-});
     {% if success_msg %}
         const modal = new bootstrap.Modal(document.getElementById('postSubmitModal'));
         modal.show();
-setTimeout(function () {
+        
+        setTimeout(function () {
             confetti({
                 particleCount: 80,
                 spread: 70,
@@ -384,6 +375,21 @@ setTimeout(function () {
         }, 400);
     {% endif %}
 
+    // Notify supervisor - fixed version
+    $("#send-to-supervisor").click(function () {
+        const employeeId = $("#postSubmitModal").data("employee-id");
+        console.log("Sending notification for employee ID:", employeeId);
+        
+        $.post("/notify-supervisor", { employee_id: employeeId })
+            .done(function () {
+                $("#email-success").removeClass("d-none").hide().fadeIn();
+                setTimeout(() => $("#email-success").fadeOut(), 4000);
+            })
+            .fail(function (xhr, status, error) {
+                console.error("Notification failed:", xhr.responseText);
+                alert("Failed to send email to supervisor. Please try again.");
+            });
+    });
     
     $("#submit-another").click(function () {
         // Clear only fields below employee, leave company and employee selected
@@ -412,6 +418,4 @@ setTimeout(function () {
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-
 </html>
