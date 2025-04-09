@@ -112,11 +112,16 @@
                     {% if not form_data or not form_data.area_observed %}disabled{% endif %}>{{ form_data.observation if form_data else "" }}</textarea>
             </div>
 
-            <!-- Date Picker -->
+            <!-- Date Picker with Calendar Icon -->
             <div class="row">
                 <div class="col-md-6">
                     <label for="date-picker">Date Observed:</label>
-                    <input type="text" id="date-picker" name="date" class="form-control" value="{{ form_data.date_observed if form_data else "" }}">
+                    <div class="input-group">
+                        <input type="text" id="date-picker" name="date" class="form-control" value="{{ form_data.date_observed if form_data else '' }}">
+                        <span class="input-group-text calendar-icon" id="calendar-trigger">
+                            <i class="bi bi-calendar"></i>
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -321,9 +326,16 @@ $(document).ready(function () {
         checkFlowState();
     });
 
-    // Apply calendar
-    flatpickr("#date-picker", {
-        dateFormat: "Y-m-d"
+    // Apply calendar with today's date as default
+    const datePicker = flatpickr("#date-picker", {
+        dateFormat: "Y-m-d",
+        defaultDate: new Date(),
+        disableMobile: "true"
+    });
+    
+    // Make calendar icon clickable
+    $("#calendar-trigger").click(function() {
+        datePicker.open();
     });
 
     // Initialize Select2
