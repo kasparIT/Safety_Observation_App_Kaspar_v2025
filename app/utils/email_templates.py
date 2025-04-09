@@ -132,7 +132,7 @@ def get_plain_text_template(employee_name, observation_data):
     text_content = f"""
 SAFETY OBSERVATION NOTIFICATION
 
-A safety observation has been submitted for {employee_name}.
+A safety observation has been submitted by {employee_name}.
 
 OBSERVATION DETAILS:
 -------------------
