@@ -118,6 +118,12 @@
     
 <script>
 $(document).ready(function () {
+$('form').on('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
+        e.preventDefault();
+        return false;
+    }
+});
     // Flow enforcement
     function checkFlowState() {
         const companySelected = $("#company-select").val() !== "";
@@ -360,6 +366,12 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function () {
+$('form').on('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
+        e.preventDefault();
+        return false;
+    }
+});
     {% if success_msg %}
         const modal = new bootstrap.Modal(document.getElementById('postSubmitModal'));
         modal.show();
