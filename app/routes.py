@@ -75,7 +75,7 @@ def home():
             conn.commit()
 
             success_msg = f"Submission successful at {timestamp}"
-            return render_template("index.html", companies=companies, success_msg=success_msg, emaint_url=EMAINT_URL)
+            return render_template("index.html", companies=companies, success_msg=success_msg, emaint_url=EMAINT_URL, employee_name=employee_name)
 
         except Exception as e:
             print(f"❌ Error inserting submission: {e}")

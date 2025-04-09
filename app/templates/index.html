@@ -341,8 +341,8 @@ $(document).ready(function () {
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07 0l3.992-3.992a.75.75 0 1 0-1.06-1.06L7.5 9.439 5.53 7.47a.75.75 0 1 0-1.06 1.06l2.5 2.5z"/>
           </svg>
         </div>
-        <h4>Observation Submitted Successfully</h4>
-        <p>Submission time: <strong>{{ success_msg.split('at')[1] if success_msg }}</strong></p>
+        <h4>Thank you, {{ employee_name }}!</h4>
+        <p>Your observation was submitted successfully at <strong>{{ success_msg.split('at')[1] if success_msg }}</strong></p>
         <div class="modal-footer d-flex justify-content-center flex-wrap gap-3">
           <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint"><i class="bi bi-tools me-2"></i>Submit to Emaint</a>
           <button type="button" class="btn btn-success" id="submit-another">Submit Another</button>
