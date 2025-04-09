@@ -391,7 +391,7 @@ $(document).ready(function () {
         $btn.addClass('loading').prop('disabled', true);
         
         $.post("/notify-supervisor", { employee_id: employeeId })
-            .done(function () {
+            .done(function (response) {
                 // Success state
                 $btn.removeClass('loading').addClass('sent');
                 setTimeout(function() {
@@ -401,8 +401,14 @@ $(document).ready(function () {
             .fail(function (xhr, status, error) {
                 // Error state
                 $btn.removeClass('loading').prop('disabled', false);
+                
+                let errorMessage = "Failed to send email to supervisor. Please try again.";
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                
                 console.error("Notification failed:", xhr.responseText);
-                alert("Failed to send email to supervisor. Please try again.");
+                alert(errorMessage);
             });
     });
     
