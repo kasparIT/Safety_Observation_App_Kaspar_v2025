@@ -90,48 +90,100 @@ textarea {
     resize: vertical;
 }
 
-/* Improved Radio Button Styling */
+/* Icon Card Radio Button Styling */
 .radio-group {
     display: flex;
     gap: 20px;
     margin-top: 8px;
 }
 
-.form-check-label {
-    display: flex;
-    align-items: center;
-    position: relative;
+.radio-card {
+    flex: 1;
     cursor: pointer;
-    font-size: 14px;
-    user-select: none;
-    color: #4a5568;
-    font-weight: 500;
-    padding: 10px 15px;
+    max-width: 180px;
+    position: relative;
+}
+
+.radio-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-card-content {
+    padding: 12px;
     border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
     transition: all 0.2s ease;
 }
 
-.form-check-input {
-    width: 18px;
-    height: 18px;
-    margin-right: 10px;
-    cursor: pointer;
-    accent-color: #0056d2;
+.radio-card:hover .radio-card-content {
+    border-color: #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-/* Hover effect for the label */
-.form-check-label:hover {
-    background-color: rgba(0, 86, 210, 0.05);
+.radio-card input[type="radio"]:checked + .radio-card-content {
+    border-width: 2px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Styling for the checked state */
-input[type="radio"]:checked + span {
-    color: #0056d2;
+.radio-card input[type="radio"][value="Safe Act"]:checked + .radio-card-content {
+    border-color: #28a745;
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.2);
+}
+
+.radio-card input[type="radio"][value="Unsafe Act"]:checked + .radio-card-content {
+    border-color: #dc3545;
+    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.2);
+}
+
+.radio-card-content .card-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.radio-card-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radio-card-label {
     font-weight: 500;
+    color: #495057;
 }
 
-input[type="radio"]:checked ~ .form-check-label {
-    background-color: rgba(0, 86, 210, 0.08);
+.radio-card input[type="radio"][value="Safe Act"]:checked + .radio-card-content .radio-card-icon {
+    color: #28a745;
+}
+
+.radio-card input[type="radio"][value="Unsafe Act"]:checked + .radio-card-content .radio-card-icon {
+    color: #dc3545;
+}
+
+.radio-card input[type="radio"][value="Safe Act"]:checked + .radio-card-content .radio-card-label {
+    color: #28a745;
+}
+
+.radio-card input[type="radio"][value="Unsafe Act"]:checked + .radio-card-content .radio-card-label {
+    color: #dc3545;
+}
+
+.radio-card input[type="radio"]:disabled + .radio-card-content {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.radio-card input[type="radio"]:focus + .radio-card-content {
+    outline: 2px solid rgba(0, 123, 255, 0.25);
+    outline-offset: 2px;
 }
 
 /* Submit Button */
@@ -506,8 +558,8 @@ input[type="radio"]:disabled {
     gap: 10px;
   }
   
-  .form-check-label {
-    padding: 8px 12px;
+  .radio-card {
+    max-width: none;
   }
 }
 
