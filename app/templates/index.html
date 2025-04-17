@@ -637,7 +637,14 @@
                 $("#location-select").val("").prop("disabled", false).trigger('change.select2');
                 $("#area-observed-select").val("").empty().append('<option value="" disabled selected></option>').prop("disabled", true);
                 $("#observation-text").val("").prop("disabled", true);
-                $("#date-picker").val("");
+                
+                // Instead of just clearing the date, set it to today's date
+                const today = new Date();
+                const dateString = today.getFullYear() + '-' + 
+                                  String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(today.getDate()).padStart(2, '0');
+                $("#date-picker").val(dateString);
+                
                 $("#postSubmitModal").modal('hide');
 
                 // Re-trigger logic to activate dependent fields
