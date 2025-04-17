@@ -388,8 +388,8 @@
                         resize: true,
                         useWorker: true
                     })({
-                        particleCount: 150,
-                        spread: 80,
+                        particleCount: 100,
+                        spread: 70,
                         origin: { y: 0.2 }
                     });
                 }, 400);
@@ -699,9 +699,11 @@
             <span class="sent-text"><i class="bi bi-check-circle-fill me-2"></i>Supervisor Notified <span class="supervisor-name"></span></span>
           </button>
           
+          {% if is_supervisor %}
           <a href="{{ emaint_url }}" target="_blank" class="btn btn-emaint">
             <i class="bi bi-tools me-2"></i>Start a Maintenance Request
           </a>
+          {% endif %}
           
           <button type="button" class="btn btn-success" id="submit-another">
             <i class="bi bi-plus-circle me-2"></i>Submit Another

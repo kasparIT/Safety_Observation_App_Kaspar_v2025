@@ -47,6 +47,29 @@ COMPANY_NAME_MAPPING = {
     "WHL": "WHL - Circle Y Saddles & Precision Saddle Tree"
 }
 
+# Function to check if an employee is a designated supervisor
+def is_designated_supervisor(employee_id):
+    """Check if an employee is a designated supervisor in the system"""
+    with get_db_connection() as conn:
+        if conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("""
+                    SELECT COUNT(*) 
+                    FROM dbo.Paylocity_Employee_Data 
+                    WHERE Employee_Id = ? AND 
+                          EXISTS (SELECT 1 FROM dbo.Paylocity_Employee_Data 
+                                 WHERE Supervisor_Employee_Id = ?)
+                """, (employee_id, employee_id))
+                
+                count = cursor.fetchone()[0]
+                return count > 0  # If they're listed as a supervisor, return True
+            except Exception as e:
+                print(f"❌ Error checking supervisor status: {e}")
+            finally:
+                cursor.close()
+    return False  # Default to not a supervisor if query fails
+
 @main.route("/", methods=["GET", "POST"])
 def home():
     # Get companies with improved connection handling
@@ -61,6 +84,7 @@ def home():
                                emaint_url=EMAINT_URL,
                                employee_name=success_data.get('employee_name'),
                                employee_id=success_data.get('employee_id'),
+                               is_supervisor=success_data.get('is_supervisor', False),
                                observation_data=success_data.get('observation_data'))
     
     if request.method == "POST":
@@ -129,12 +153,16 @@ def home():
             
             success_msg = f"Submission successful at {timestamp}"
             
+            # Check if the employee is a supervisor
+            is_supervisor_role = is_designated_supervisor(employee_id)
+            
             # Store success data in session and redirect
             session['success_data'] = {
                 'success_msg': success_msg,
                 'employee_name': employee_name,
                 'employee_id': employee_id,
-                'observation_data': observation_data
+                'observation_data': observation_data,
+                'is_supervisor': is_supervisor_role
             }
             
             # Redirect to GET request to prevent form resubmission
