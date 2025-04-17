@@ -5,14 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
     <meta name="theme-color" content="#0056d2">
     <title>Safety Observation</title>
+    
+    <!-- Preconnect to external domains to speed up subsequent requests -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://code.jquery.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <!-- Preload critical resources -->
     <link rel="preload" href="{{ url_for('static', filename='css/styles.css') }}" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='images/kbs_logo.png') }}" as="image">
     
-    <!-- Critical CSS -->
+    <!-- Inlining critical CSS for faster initial render -->
     <style>
-        /* Inlined critical CSS for faster initial render */
+        /* Critical CSS */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f7fc;
@@ -49,20 +57,57 @@
             font-weight: 600;
             margin: 0;
         }
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .col-md-6 {
+            flex: 1;
+            min-width: 250px;
+        }
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 6px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+        .btn-primary {
+            background-color: #0056d2;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
     </style>
     
-    <!-- Defer non-critical CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" media="print" onload="this.media='all'">
     
-    <!-- Defer JS loading -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <!-- Add noscript fallbacks for CSS -->
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </noscript>
 </head>
 <body>
     <div class="container">
@@ -74,7 +119,6 @@
             </div>
         </div>
 
-        
         {% if error_msg %}
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 {{ error_msg }}
@@ -202,365 +246,422 @@
         </form>
     </div>
 
-<!-- Load JavaScript at the end of the body for better performance -->
+<!-- Progressively load JavaScript resources -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Load non-critical scripts dynamically
-    function loadScript(url, callback) {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = url;
-        script.async = true;
-        if (callback) {
-            script.onload = callback;
+    // Immediately execute critical script
+    document.addEventListener('DOMContentLoaded', function() {
+        // Flag to track if libraries are loaded
+        window.appLibrariesLoaded = false;
+        
+        // Load essential resources first
+        const criticalResources = [
+            { type: 'script', src: 'https://code.jquery.com/jquery-3.6.0.min.js' }
+        ];
+        
+        // Non-critical resources to load after critical ones
+        const nonCriticalResources = [
+            { type: 'script', src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js' },
+            { type: 'link', href: 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css' },
+            { type: 'script', src: 'https://cdn.jsdelivr.net/npm/flatpickr' },
+            { type: 'link', href: 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css' },
+            { type: 'script', src: 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js' }
+        ];
+        
+        // Success modal resources (only load if needed)
+        {% if success_msg %}
+        const successResources = [
+            { type: 'script', src: 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js' }
+        ];
+        {% endif %}
+        
+        // Load a resource asynchronously
+        function loadResource(resource) {
+            return new Promise((resolve, reject) => {
+                let element;
+                
+                if (resource.type === 'script') {
+                    element = document.createElement('script');
+                    element.src = resource.src;
+                    element.async = true;
+                } else if (resource.type === 'link') {
+                    element = document.createElement('link');
+                    element.rel = 'stylesheet';
+                    element.href = resource.href;
+                }
+                
+                element.onload = () => resolve(resource);
+                element.onerror = () => reject(resource);
+                
+                document.body.appendChild(element);
+            });
         }
-        document.body.appendChild(script);
-    }
-    
-    // Load scripts in sequence with dependencies
-    loadScript('https://code.jquery.com/jquery-3.6.0.min.js', function() {
-        // Initialize alert dismissal
-        setTimeout(function () {
-            const alertEl = document.querySelector('.alert');
-            if (alertEl) {
-                $(alertEl).slideUp(500, function () {
-                    $(this).remove();
+        
+        // Load resources in sequence
+        async function loadResourcesInSequence(resources) {
+            for (const resource of resources) {
+                try {
+                    await loadResource(resource);
+                } catch (e) {
+                    console.error('Failed to load resource:', e);
+                }
+            }
+        }
+        
+        // Start loading critical resources immediately
+        loadResourcesInSequence(criticalResources).then(() => {
+            // Once jQuery is loaded, initialize immediate functionality
+            if (typeof $ !== 'undefined') {
+                // Initialize alert dismissal
+                setTimeout(function () {
+                    const alertEl = document.querySelector('.alert');
+                    if (alertEl) {
+                        $(alertEl).slideUp(500, function () {
+                            $(this).remove();
+                        });
+                    }
+                }, 10000); // 10 seconds
+                
+                // Load non-critical resources
+                loadResourcesInSequence(nonCriticalResources).then(() => {
+                    // All libraries are loaded, initialize components
+                    initializeApp();
+                    
+                    // Load success modal resources if needed
+                    {% if success_msg %}
+                    loadResourcesInSequence(successResources).then(() => {
+                        showSuccessModal();
+                    });
+                    {% endif %}
                 });
             }
-        }, 10000); // 10 seconds
+        });
         
-        // Load Bootstrap JS
-        loadScript('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', function() {
-            // Load Select2 after Bootstrap
-            loadScript('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', function() {
-                // Initialize Select2
-                $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
-                    minimumResultsForSearch: 6,
-                    width: '100%'
-                });
+        // Initialize the application once all libraries are loaded
+        function initializeApp() {
+            // Mark libraries as loaded
+            window.appLibrariesLoaded = true;
+            
+            // Initialize Select2
+            $("#company-select, #employee-select, #location-select, #area-observed-select").select2({
+                minimumResultsForSearch: 6,
+                width: '100%'
             });
             
-            // Load Flatpickr
-            loadScript('https://cdn.jsdelivr.net/npm/flatpickr', function() {
-                // Apply calendar with today's date as default
-                const datePicker = flatpickr("#date-picker", {
-                    dateFormat: "Y-m-d",
-                    defaultDate: new Date(),
-                    disableMobile: false,
-                    allowInput: true,
-                    static: true
-                });
-                
-                // Make calendar icon clickable
-                $("#calendar-trigger").click(function() {
-                    datePicker.open();
-                });
+            // Apply calendar with today's date as default
+            const datePicker = flatpickr("#date-picker", {
+                dateFormat: "Y-m-d",
+                defaultDate: new Date(),
+                disableMobile: false,
+                allowInput: true,
+                static: true
             });
             
-            // Load Confetti if we have a success message
-            {% if success_msg %}
-            loadScript('https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js', function() {
-                if (typeof confetti !== 'undefined') {
-                    confetti.maxCount = 150;       // Max particles
-                    confetti.speed = 3;            // Faster speed
-                    confetti.frameInterval = 15;   // Smoother animation
-                    confetti.alpha = 1.0;          // Opacity
-                    confetti.zIndex = 1080;        // Ensure it's above modal
-                    
-                    const modal = new bootstrap.Modal(document.getElementById('postSubmitModal'));
-                    modal.show();
-                    
-                    setTimeout(function () {
-                        confetti({
-                            particleCount: 80,
-                            spread: 70,
-                            origin: { y: 0.2 }
-                        });
-                    }, 400);
+            // Make calendar icon clickable
+            $("#calendar-trigger").click(function() {
+                datePicker.open();
+            });
+            
+            // Main app functionality
+            $('form').on('keydown', function (e) {
+                if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    return false;
                 }
             });
-            {% endif %}
-        });
-        
-        // Main app functionality
-        $('form').on('keydown', function (e) {
-            if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
-                e.preventDefault();
-                return false;
-            }
-        });
-        
-        // Flow enforcement
-        function checkFlowState() {
-            const companySelected = $("#company-select").val() !== "";
-            const employeeSelected = $("#employee-select").val() !== "";
-            const actSelected = $("input[name='overall_act']:checked").val() !== undefined;
-            const locationSelected = $("#location-select").val() !== "";
-            const areaSelected = $("#area-observed-select").val() !== "";
-
-            $("#employee-select").prop("disabled", !companySelected);
-            $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
-            $("#location-select").prop("disabled", !actSelected);
-            $("#area-observed-select").prop("disabled", !locationSelected);
-            $("#observation-text").prop("disabled", !areaSelected);
+            
+            // Form flow controls - consolidated for better performance
+            initializeFormFlow();
         }
-
-        $("#company-select").change(function () {
-            let selectedCompany = $(this).val();
-            let employeeDropdown = $("#employee-select");
-
-            employeeDropdown.empty().append('<option value="">Loading employees...</option>').prop("disabled", true);
-            checkFlowState();
-
-            if (selectedCompany) {
-                $.ajax({
-                    url: "/get-employees",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ company: selectedCompany }),
-                    success: function (response) {
-                        employeeDropdown.empty().append('<option value="" disabled selected></option>');
-                        response.forEach(emp => {
-                            employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
-                        });
-                        
-                        // If we have form data, select the correct employee
-                        {% if form_data and form_data.employee_id %}
-                        employeeDropdown.val("{{ form_data.employee_id }}");
-                        {% endif %}
-                        
-                        employeeDropdown.prop("disabled", false).trigger('change.select2');
-                        checkFlowState();
-                    },
-                    error: function () {
-                        employeeDropdown.empty().append('<option value="">Failed to load</option>');
-                    }
-                });
+        
+        // Show success modal with confetti
+        function showSuccessModal() {
+            if (typeof confetti !== 'undefined' && typeof bootstrap !== 'undefined') {
+                const modal = new bootstrap.Modal(document.getElementById('postSubmitModal'));
+                modal.show();
+                
+                setTimeout(function () {
+                    confetti({
+                        particleCount: 80,
+                        spread: 70,
+                        origin: { y: 0.2 }
+                    });
+                }, 400);
             }
-        });
+        }
+        
+        // Initialize form flow controls
+        function initializeFormFlow() {
+            // Flow enforcement
+            function checkFlowState() {
+                const companySelected = $("#company-select").val() !== "";
+                const employeeSelected = $("#employee-select").val() !== "";
+                const actSelected = $("input[name='overall_act']:checked").val() !== undefined;
+                const locationSelected = $("#location-select").val() !== "";
+                const areaSelected = $("#area-observed-select").val() !== "";
 
-        $("#employee-select").change(function () {
-            {% if not form_data %}
-            $("input[name='overall_act']").prop("checked", false);
+                $("#employee-select").prop("disabled", !companySelected);
+                $("#safe-act, #unsafe-act").prop("disabled", !employeeSelected);
+                $("#location-select").prop("disabled", !actSelected);
+                $("#area-observed-select").prop("disabled", !locationSelected);
+                $("#observation-text").prop("disabled", !areaSelected);
+            }
+
+            $("#company-select").change(function () {
+                let selectedCompany = $(this).val();
+                let employeeDropdown = $("#employee-select");
+
+                employeeDropdown.empty().append('<option value="">Loading employees...</option>').prop("disabled", true);
+                checkFlowState();
+
+                if (selectedCompany) {
+                    $.ajax({
+                        url: "/get-employees",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({ company: selectedCompany }),
+                        success: function (response) {
+                            employeeDropdown.empty().append('<option value="" disabled selected></option>');
+                            response.forEach(emp => {
+                                employeeDropdown.append(`<option value="${emp.id}">${emp.name}</option>`);
+                            });
+                            
+                            // If we have form data, select the correct employee
+                            {% if form_data and form_data.employee_id %}
+                            employeeDropdown.val("{{ form_data.employee_id }}");
+                            {% endif %}
+                            
+                            employeeDropdown.prop("disabled", false).trigger('change.select2');
+                            checkFlowState();
+                        },
+                        error: function () {
+                            employeeDropdown.empty().append('<option value="">Failed to load</option>');
+                        }
+                    });
+                }
+            });
+
+            $("#employee-select").change(function () {
+                {% if not form_data %}
+                $("input[name='overall_act']").prop("checked", false);
+                {% endif %}
+                checkFlowState();
+            });
+
+            $("input[name='overall_act']").change(function () {
+                {% if not form_data %}
+                $("#location-select").val("").trigger("change.select2");
+                {% endif %}
+                checkFlowState();
+            });
+
+            $("#location-select").change(function () {
+                const selectedLocation = $(this).val();
+                const areaDropdown = $("#area-observed-select");
+                areaDropdown.empty();
+
+                const areaObservedOptions = {
+                    "KPI": [
+                        "Welding shop",
+                        "Office",
+                        "Parts room",
+                        "Wood shop",
+                        "Mechanic shop",
+                        "Parking bay"
+                    ],
+                    "Off-site": [
+                        "Other"
+                    ],
+                    "HFA": [
+                        "Production Floor",
+                        "Quality Control",
+                        "Warehouse",
+                        "HFA-Office",
+                        "IOTA-Plotter",
+                        "IOTA-Molding",
+                        "IOTA-Demold",
+                        "IOTA-HAAS Machine",
+                        "IOTA-FADAL Machine",
+                        "IOTA-Finishing",
+                        "IOTA-Paint",
+                        "IOTA-Engineering",
+                        "IOTA-Mixing",
+                        "IOTA-Inventory",
+                        "Stiller",
+                        "Other"
+                    ],
+                    "IT Security": [
+                        "Unlocked/Unattended Computers",
+                        "Unauthorized Access",
+                        "Security Policy Violations",
+                        "Phishing Email",
+                        "Uncovered drink",
+                        "Exposed wiring/devices",
+                        "Password Exposed"
+                    ],
+                    "TBE": [
+                        "Manufacturing",
+                        "Paint Shop",
+                        "Shipping Department",
+                        "Assembly",
+                        "Blast and prep",
+                        "Material handler",
+                        "Paint",
+                        "Shipping",
+                        "Fabrication",
+                        "Welding",
+                        "Office",
+                        "Engineering"
+                    ],
+                    "TPM": [
+                        "Office",
+                        "Depository"
+                    ],
+                    "KCI": [
+                        "Accounting",
+                        "Purchasing",
+                        "Payroll",
+                        "IT",
+                        "Human Resources",
+                        "Executive",
+                        "KPO",
+                        "Other"
+                    ],
+                    "CY": [
+                        "CY DL Bits",
+                        "CY DL Cutting Room",
+                        "CY DL Pads",
+                        "CY DL Saddles",
+                        "CY DL Tack",
+                        "CY Shipping",
+                        "CY RM Warehouse",
+                        "CY Repair Saddles",
+                        "CY Accounting",
+                        "CY IT Dept",
+                        "CY Planning",
+                        "CY Marketing",
+                        "CY Purchasing",
+                        "CY Product Development",
+                        "CY Sales",
+                        "CY Sale Staff",
+                        "CY ADM Staff",
+                        "CY MFG Staff",
+                        "CY Maintenance",
+                        "CY Customer Service",
+                        "CY Engineering",
+                        "HTA Marketing",
+                        "PST Direct Labor",
+                        "PST RM Warehouse",
+                        "PST Staff",
+                        "SSR Customer Service"
+                    ]
+                };
+
+                if (selectedLocation && areaObservedOptions[selectedLocation]) {
+                    areaDropdown.append('<option value="" disabled selected></option>');
+                    areaObservedOptions[selectedLocation].forEach(area => {
+                        const isSelected = {% if form_data and form_data.area_observed %}area === "{{ form_data.area_observed }}"{% else %}false{% endif %};
+                        areaDropdown.append(`<option value="${area}" ${isSelected ? 'selected' : ''}>${area}</option>`);
+                    });
+                    areaDropdown.prop("disabled", false);
+                } else {
+                    areaDropdown.append('<option value="" disabled selected></option>').prop("disabled", true);
+                }
+
+                areaDropdown.trigger('change.select2');
+                checkFlowState();
+            });
+
+            $("#area-observed-select").change(function () {
+                checkFlowState();
+            });
+            
+            // Initial state check and trigger changes
+            checkFlowState();
+            
+            // If we have form data, trigger appropriate cascading changes
+            {% if form_data and form_data.company %}
+            $("#company-select").trigger("change");
             {% endif %}
-            checkFlowState();
-        });
-
-        $("input[name='overall_act']").change(function () {
-            {% if not form_data %}
-            $("#location-select").val("").trigger("change.select2");
+            
+            {% if form_data and form_data.location %}
+            setTimeout(function() {
+                $("#location-select").trigger("change");
+            }, 500);
             {% endif %}
-            checkFlowState();
-        });
-
-        $("#location-select").change(function () {
-            const selectedLocation = $(this).val();
-            const areaDropdown = $("#area-observed-select");
-            areaDropdown.empty();
-
-            const areaObservedOptions = {
-                "KPI": [
-                    "Welding shop",
-                    "Office",
-                    "Parts room",
-                    "Wood shop",
-                    "Mechanic shop",
-                    "Parking bay"
-                ],
-                "Off-site": [
-                    "Other"
-                ],
-                "HFA": [
-                    "Production Floor",
-                    "Quality Control",
-                    "Warehouse",
-                    "HFA-Office",
-                    "IOTA-Plotter",
-                    "IOTA-Molding",
-                    "IOTA-Demold",
-                    "IOTA-HAAS Machine",
-                    "IOTA-FADAL Machine",
-                    "IOTA-Finishing",
-                    "IOTA-Paint",
-                    "IOTA-Engineering",
-                    "IOTA-Mixing",
-                    "IOTA-Inventory",
-                    "Stiller",
-                    "Other"
-                ],
-                "IT Security": [
-                    "Unlocked/Unattended Computers",
-                    "Unauthorized Access",
-                    "Security Policy Violations",
-                    "Phishing Email",
-                    "Uncovered drink",
-                    "Exposed wiring/devices",
-                    "Password Exposed"
-                ],
-                "TBE": [
-                    "Manufacturing",
-                    "Paint Shop",
-                    "Shipping Department",
-                    "Assembly",
-                    "Blast and prep",
-                    "Material handler",
-                    "Paint",
-                    "Shipping",
-                    "Fabrication",
-                    "Welding",
-                    "Office",
-                    "Engineering"
-                ],
-                "TPM": [
-                    "Office",
-                    "Depository"
-                ],
-                "KCI": [
-                    "Accounting",
-                    "Purchasing",
-                    "Payroll",
-                    "IT",
-                    "Human Resources",
-                    "Executive",
-                    "KPO",
-                    "Other"
-                ],
-                "CY": [
-                    "CY DL Bits",
-                    "CY DL Cutting Room",
-                    "CY DL Pads",
-                    "CY DL Saddles",
-                    "CY DL Tack",
-                    "CY Shipping",
-                    "CY RM Warehouse",
-                    "CY Repair Saddles",
-                    "CY Accounting",
-                    "CY IT Dept",
-                    "CY Planning",
-                    "CY Marketing",
-                    "CY Purchasing",
-                    "CY Product Development",
-                    "CY Sales",
-                    "CY Sale Staff",
-                    "CY ADM Staff",
-                    "CY MFG Staff",
-                    "CY Maintenance",
-                    "CY Customer Service",
-                    "CY Engineering",
-                    "HTA Marketing",
-                    "PST Direct Labor",
-                    "PST RM Warehouse",
-                    "PST Staff",
-                    "SSR Customer Service"
-                ]
-            };
-
-            if (selectedLocation && areaObservedOptions[selectedLocation]) {
-                areaDropdown.append('<option value="" disabled selected></option>');
-                areaObservedOptions[selectedLocation].forEach(area => {
-                    const isSelected = {% if form_data and form_data.area_observed %}area === "{{ form_data.area_observed }}"{% else %}false{% endif %};
-                    areaDropdown.append(`<option value="${area}" ${isSelected ? 'selected' : ''}>${area}</option>`);
-                });
-                areaDropdown.prop("disabled", false);
-            } else {
-                areaDropdown.append('<option value="" disabled selected></option>').prop("disabled", true);
-            }
-
-            areaDropdown.trigger('change.select2');
-            checkFlowState();
-        });
-
-        $("#area-observed-select").change(function () {
-            checkFlowState();
-        });
-        
-        // Initial state check and trigger changes
-        checkFlowState();
-        
-        // If we have form data, trigger appropriate cascading changes
-        {% if form_data and form_data.company %}
-        $("#company-select").trigger("change");
-        {% endif %}
-        
-        {% if form_data and form_data.location %}
-        setTimeout(function() {
-            $("#location-select").trigger("change");
-        }, 500);
-        {% endif %}
-        
-        // Notify supervisor functionality
-        $("#send-to-supervisor").click(function () {
-            if ($(this).hasClass('sent')) {
-                return; // Already sent, do nothing
-            }
             
-            const $btn = $(this);
-            const employeeId = $("#postSubmitModal").data("employee-id");
+            // Notify supervisor functionality
+            $("#send-to-supervisor").click(function () {
+                if ($(this).hasClass('sent')) {
+                    return; // Already sent, do nothing
+                }
+                
+                const $btn = $(this);
+                const employeeId = $("#postSubmitModal").data("employee-id");
+                
+                // Show loading state
+                $btn.addClass('loading').prop('disabled', true);
+                
+                $.post("/notify-supervisor", { employee_id: employeeId })
+                    .done(function (response) {
+                        // Success state
+                        $btn.removeClass('loading').addClass('sent');
+                        
+                        // Display supervisor name if available
+                        if (response.message && response.message.includes("Email sent to")) {
+                            // Extract supervisor name from the message
+                            const supervisorName = response.message.replace("Email sent to ", "");
+                            $btn.find('.supervisor-name').text('(' + supervisorName + ')');
+                        }
+                        
+                        setTimeout(function() {
+                            $btn.prop('disabled', false);
+                        }, 2000);
+                    })
+                    .fail(function (xhr, status, error) {
+                        // Error state
+                        $btn.removeClass('loading').prop('disabled', false);
+                        
+                        let errorMessage = "Failed to send email to supervisor. Please try again.";
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        }
+                        
+                        console.error("Notification failed:", xhr.responseText);
+                        alert(errorMessage);
+                    });
+            });
             
-            // Show loading state
-            $btn.addClass('loading').prop('disabled', true);
+            $("#submit-another").click(function () {
+                // Clear only fields below employee, leave company and employee selected
+                $("#safe-act, #unsafe-act").prop("checked", false).prop("disabled", false);
+                $("#location-select").val("").prop("disabled", false).trigger('change.select2');
+                $("#area-observed-select").val("").empty().append('<option value="" disabled selected></option>').prop("disabled", true);
+                $("#observation-text").val("").prop("disabled", true);
+                $("#date-picker").val("");
+                $("#postSubmitModal").modal('hide');
+
+                // Re-trigger logic to activate dependent fields
+                $("#employee-select").trigger('change');
+            });
+
+            $("#exit-button").click(function () {
+                window.open('', '_self');
+                window.close();
+                setTimeout(function () {
+                    window.location.href = "https://www.google.com";
+                }, 300);
+            });
             
-            $.post("/notify-supervisor", { employee_id: employeeId })
-                .done(function (response) {
-                    // Success state
-                    $btn.removeClass('loading').addClass('sent');
-                    
-                    // Display supervisor name if available
-                    if (response.message && response.message.includes("Email sent to")) {
-                        // Extract supervisor name from the message
-                        const supervisorName = response.message.replace("Email sent to ", "");
-                        $btn.find('.supervisor-name').text('(' + supervisorName + ')');
-                    }
-                    
-                    setTimeout(function() {
-                        $btn.prop('disabled', false);
-                    }, 2000);
-                })
-                .fail(function (xhr, status, error) {
-                    // Error state
-                    $btn.removeClass('loading').prop('disabled', false);
-                    
-                    let errorMessage = "Failed to send email to supervisor. Please try again.";
-                    if (xhr.responseJSON && xhr.responseJSON.error) {
-                        errorMessage = xhr.responseJSON.error;
-                    }
-                    
-                    console.error("Notification failed:", xhr.responseText);
-                    alert(errorMessage);
-                });
-        });
-        
-        $("#submit-another").click(function () {
-            // Clear only fields below employee, leave company and employee selected
-            $("#safe-act, #unsafe-act").prop("checked", false).prop("disabled", false);
-            $("#location-select").val("").prop("disabled", false).trigger('change.select2');
-            $("#area-observed-select").val("").empty().append('<option value="" disabled selected></option>').prop("disabled", true);
-            $("#observation-text").val("").prop("disabled", true);
-            $("#date-picker").val("");
-            $("#postSubmitModal").modal('hide');
-
-            // Re-trigger logic to activate dependent fields
-            $("#employee-select").trigger('change');
-        });
-
-        $("#exit-button").click(function () {
-            window.open('', '_self');
-            window.close();
-            setTimeout(function () {
-                window.location.href = "https://www.google.com";
-            }, 300);
-        });
-        
-        // Fix for iOS device modal background scrolling issue
-        $('.modal').on('show.bs.modal', function() {
-            $('body').addClass('modal-open-ios');
-        });
-        
-        $('.modal').on('hidden.bs.modal', function() {
-            $('body').removeClass('modal-open-ios');
-        });
+            // Fix for iOS device modal background scrolling issue
+            $('.modal').on('show.bs.modal', function() {
+                $('body').addClass('modal-open-ios');
+            });
+            
+            $('.modal').on('hidden.bs.modal', function() {
+                $('body').removeClass('modal-open-ios');
+            });
+        }
     });
-});
 </script>
 
 <!-- Observation Submitted Modal -->

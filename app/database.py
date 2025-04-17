@@ -51,7 +51,7 @@ def get_db_connection():
     if connection_pool and len(connection_pool) > 0:
         try:
             conn = connection_pool.pop()
-            # Check if connection is still valid
+            # Check if connection is still valid with lightweight query
             cursor = conn.cursor()
             cursor.execute("SELECT 1")
             cursor.fetchone()
@@ -67,6 +67,7 @@ def get_db_connection():
     # If no connection from pool, create a new one
     if conn is None:
         try:
+            # Add timeout logging to identify slow connections
             start_time = time.time()
             conn = pyodbc.connect(get_connection_string())
             elapsed = time.time() - start_time

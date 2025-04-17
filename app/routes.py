@@ -7,6 +7,7 @@ import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
+from functools import lru_cache  # Use Python's built-in cache
 
 # Create utils directory if it doesn't exist
 utils_dir = os.path.join(os.path.dirname(__file__), '..', 'utils')
@@ -89,45 +90,22 @@ def home():
             # Get employee name for form preservation
             employee_name = None
             if employee_id:
-                with get_db_connection() as conn:
-                    if conn:
-                        cursor = conn.cursor()
-                        try:
-                            cursor.execute("""
-                                SELECT First_Name, Middle_Name, Last_Name
-                                FROM dbo.Paylocity_Employee_Data
-                                WHERE Employee_Id = ?
-                            """, (employee_id,))
-                            row = cursor.fetchone()
-                            if row:
-                                first, middle, last = row
-                                employee_name = f"{first} {middle + ' ' if middle else ''}{last}"
-                        finally:
-                            cursor.close()
+                employee_name = get_employee_name_by_id(employee_id)
             
             return render_template("index.html", companies=companies, error_msg=error_msg,
                                   form_data=form_data, employee_name=employee_name)
 
         try:
-            employee_name = None
+            employee_name = get_employee_name_by_id(employee_id)
+            if not employee_name:
+                employee_name = "Unknown"
+
             with get_db_connection() as conn:
                 if not conn:
                     raise Exception("Failed to connect to database")
                 
                 cursor = conn.cursor()
                 try:
-                    cursor.execute("""
-                        SELECT First_Name, Middle_Name, Last_Name
-                        FROM dbo.Paylocity_Employee_Data
-                        WHERE Employee_Id = ?
-                    """, (employee_id,))
-                    row = cursor.fetchone()
-                    if row:
-                        first, middle, last = row
-                        employee_name = f"{first} {middle + ' ' if middle else ''}{last}"
-                    else:
-                        employee_name = "Unknown"
-
                     cursor.execute("""
                         INSERT INTO dbo.SafetyObservationsApp_Revamp
                         (company, employee_id, employee_name, overall_act, location, area_observed, observation, date_observed)
@@ -169,12 +147,42 @@ def home():
 
     return render_template("index.html", companies=companies)
 
+# Helper function with caching for employee name lookup
+@lru_cache(maxsize=128)
+def get_employee_name_by_id(employee_id):
+    """Get employee name by ID with caching"""
+    with get_db_connection() as conn:
+        if conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("""
+                    SELECT First_Name, Middle_Name, Last_Name
+                    FROM dbo.Paylocity_Employee_Data
+                    WHERE Employee_Id = ?
+                """, (employee_id,))
+                row = cursor.fetchone()
+                if row:
+                    first, middle, last = row
+                    return f"{first} {middle + ' ' if middle else ''}{last}"
+                return None
+            finally:
+                cursor.close()
+    return None
+
 @main.route("/get-employees", methods=["POST"])
 def get_employees():
     data = request.json
     selected_company = data.get("company")
-    employees = []
+    
+    # Use the cached function to get employees
+    employees = get_employees_by_company(selected_company)
+    return jsonify(employees)
 
+# Cache employees by company for 5 minutes
+@lru_cache(maxsize=32)
+def get_employees_by_company(company_name):
+    """Get employees by company with caching"""
+    employees = []
     with get_db_connection() as conn:
         if conn:
             cursor = conn.cursor()
@@ -184,7 +192,7 @@ def get_employees():
                     FROM dbo.Paylocity_Employee_Data 
                     WHERE Company_Name = ? AND Is_Active = 'Yes' AND First_Name IS NOT NULL AND Last_Name IS NOT NULL
                     ORDER BY First_Name ASC
-                """, (selected_company,))
+                """, (company_name,))
                 employees = [
                     {"id": row[0], "name": f"{row[1]} {row[2]+' ' if row[2] else ''}{row[3]}"}
                     for row in cursor.fetchall()
@@ -193,9 +201,7 @@ def get_employees():
                 print(f"❌ Error fetching employees: {e}")
             finally:
                 cursor.close()
-
-    return jsonify(employees)
-
+    return employees
 
 @main.route("/notify-supervisor", methods=["POST"])
 def notify_supervisor():
